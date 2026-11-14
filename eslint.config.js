@@ -32,6 +32,7 @@ export default [
 				location: "readonly",
 				console: "readonly",
 				process: "readonly",
+				queueMicrotask: "readonly",
 			},
 		},
 		settings: { react: { version: "detect" } },
