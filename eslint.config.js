@@ -23,6 +23,7 @@ export default [
 				createImageBitmap: "readonly",
 				Image: "readonly",
 				Blob: "readonly",
+				File: "readonly",
 				FormData: "readonly",
 				URL: "readonly",
 				setTimeout: "readonly",

@@ -5,8 +5,20 @@ import { fileToDataUrl } from "../../utils/photos.js";
 import { shrinkImage } from "../../utils/shrinkImage.js";
 import PhotoUploader from "./PhotoUploader.jsx";
 
-const categories = ["Judogis", "Cinturones", "Protecciones", "Remeras y buzos", "Otros"];
-const conditions = ["Nuevo", "Como nuevo", "Muy buen estado", "Buen estado", "Con detalles"];
+const categories = [
+	"Judogis",
+	"Cinturones",
+	"Protecciones",
+	"Remeras y buzos",
+	"Otros",
+];
+const conditions = [
+	"Nuevo",
+	"Como nuevo",
+	"Muy buen estado",
+	"Buen estado",
+	"Con detalles",
+];
 const paymentOptions = ["Efectivo", "Transferencia", "Mercado Pago"];
 const shippingOptions = ["Retiro en persona", "Envío por correo", "A convenir"];
 
@@ -14,7 +26,12 @@ function makeListingId() {
 	return `l${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 }
 
-export default function ListingForm({ uid, isAdmin, onLoginRequest, onAnnouncement }) {
+export default function ListingForm({
+	uid,
+	isAdmin,
+	onLoginRequest,
+	onAnnouncement,
+}) {
 	const [open, setOpen] = useState(false);
 	const [busy, setBusy] = useState(false);
 	const [status, setStatus] = useState("");
@@ -44,7 +61,9 @@ export default function ListingForm({ uid, isAdmin, onLoginRequest, onAnnounceme
 			return;
 		}
 		if (files.length && !alt.trim()) {
-			setStatus("Escribí una descripción corta de la foto. Ayuda a quienes usan lector de pantalla.");
+			setStatus(
+				"Escribí una descripción corta de la foto. Ayuda a quienes usan lector de pantalla.",
+			);
 			altRef.current?.focus();
 			return;
 		}
@@ -111,10 +130,21 @@ export default function ListingForm({ uid, isAdmin, onLoginRequest, onAnnounceme
 					Publicar mi producto
 				</button>
 			</div>
-			<form id="listing-form" className={open ? "on" : ""} onSubmit={handleSubmit} hidden={!open}>
+			<form
+				id="listing-form"
+				className={open ? "on" : ""}
+				onSubmit={handleSubmit}
+				hidden={!open}
+			>
 				<div className="f">
 					<label htmlFor="listing-seller">Tu nombre</label>
-					<input id="listing-seller" name="seller" required maxLength="40" placeholder="Nombre y apellido o apodo" />
+					<input
+						id="listing-seller"
+						name="seller"
+						required
+						maxLength="40"
+						placeholder="Nombre y apellido o apodo"
+					/>
 				</div>
 				<div className="f">
 					<label htmlFor="listing-title">Título</label>
@@ -129,7 +159,11 @@ export default function ListingForm({ uid, isAdmin, onLoginRequest, onAnnounceme
 				</div>
 				<div>
 					<label htmlFor="listing-category">Categoría</label>
-					<select id="listing-category" name="category" defaultValue={categories[0]}>
+					<select
+						id="listing-category"
+						name="category"
+						defaultValue={categories[0]}
+					>
 						{categories.map((category) => (
 							<option key={category}>{category}</option>
 						))}
@@ -137,11 +171,21 @@ export default function ListingForm({ uid, isAdmin, onLoginRequest, onAnnounceme
 				</div>
 				<div>
 					<label htmlFor="listing-size">Talle</label>
-					<input id="listing-size" name="size" required maxLength="10" placeholder="A3 / 170 cm" />
+					<input
+						id="listing-size"
+						name="size"
+						required
+						maxLength="10"
+						placeholder="A3 / 170 cm"
+					/>
 				</div>
 				<div>
 					<label htmlFor="listing-condition">Estado</label>
-					<select id="listing-condition" name="condition" defaultValue="Muy buen estado">
+					<select
+						id="listing-condition"
+						name="condition"
+						defaultValue="Muy buen estado"
+					>
 						{conditions.map((condition) => (
 							<option key={condition}>{condition}</option>
 						))}
@@ -149,10 +193,18 @@ export default function ListingForm({ uid, isAdmin, onLoginRequest, onAnnounceme
 				</div>
 				<div>
 					<label htmlFor="listing-price">Precio ($)</label>
-					<input id="listing-price" name="price" type="number" min="0" required />
+					<input
+						id="listing-price"
+						name="price"
+						type="number"
+						min="0"
+						required
+					/>
 				</div>
 				<div className="f">
-					<label htmlFor="listing-whatsapp">WhatsApp (con código de país)</label>
+					<label htmlFor="listing-whatsapp">
+						WhatsApp (con código de país)
+					</label>
 					<input
 						ref={whatsappRef}
 						id="listing-whatsapp"
@@ -165,7 +217,11 @@ export default function ListingForm({ uid, isAdmin, onLoginRequest, onAnnounceme
 				</div>
 				<div className="f">
 					<span id="listing-payment-label">Formas de pago</span>
-					<div className="ck" role="group" aria-labelledby="listing-payment-label">
+					<div
+						className="ck"
+						role="group"
+						aria-labelledby="listing-payment-label"
+					>
 						{paymentOptions.map((option) => (
 							<label key={option}>
 								<input type="checkbox" name="payment" value={option} /> {option}
@@ -175,17 +231,27 @@ export default function ListingForm({ uid, isAdmin, onLoginRequest, onAnnounceme
 				</div>
 				<div className="f">
 					<span id="listing-shipping-label">Entrega</span>
-					<div className="ck" role="group" aria-labelledby="listing-shipping-label">
+					<div
+						className="ck"
+						role="group"
+						aria-labelledby="listing-shipping-label"
+					>
 						{shippingOptions.map((option) => (
 							<label key={option}>
-								<input type="checkbox" name="shipping" value={option} /> {option}
+								<input type="checkbox" name="shipping" value={option} />{" "}
+								{option}
 							</label>
 						))}
 					</div>
 				</div>
 				<div className="f">
 					<label htmlFor="listing-city">Ciudad o zona</label>
-					<input id="listing-city" name="city" maxLength="40" placeholder="Ej: Rosario, Santa Fe" />
+					<input
+						id="listing-city"
+						name="city"
+						maxLength="40"
+						placeholder="Ej: Rosario, Santa Fe"
+					/>
 				</div>
 				<PhotoUploader
 					files={files}

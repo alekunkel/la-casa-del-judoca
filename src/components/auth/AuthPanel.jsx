@@ -62,7 +62,9 @@ export default function AuthPanel({ open, onAnnouncement }) {
 				return;
 			}
 			await resetPassword(email.trim());
-			setMessage("Si el correo tiene una cuenta, te mandamos un enlace para cambiar la contraseña.");
+			setMessage(
+				"Si el correo tiene una cuenta, te mandamos un enlace para cambiar la contraseña.",
+			);
 		});
 
 	const handleSignOut = () =>
@@ -73,17 +75,33 @@ export default function AuthPanel({ open, onAnnouncement }) {
 		});
 
 	return (
-		<div id="auth" className="ap" role="region" aria-label="Ingresar o crear cuenta" hidden={!open}>
+		<div
+			id="auth"
+			className="ap"
+			role="region"
+			aria-label="Ingresar o crear cuenta"
+			hidden={!open}
+		>
 			<p>
-				<b>Ingresá o creá tu cuenta para publicar, opinar o dejar una búsqueda.</b>
+				<b>
+					Ingresá o creá tu cuenta para publicar, opinar o dejar una búsqueda.
+				</b>
 			</p>
 			{user ? (
 				<div>
 					<p>
 						Ingresaste como {user.email}
-						{user.emailVerified ? "" : ". Todavía falta confirmar tu correo: revisá tu bandeja de entrada."}
+						{user.emailVerified
+							? ""
+							: ". Todavía falta confirmar tu correo: revisá tu bandeja de entrada."}
 					</p>
-					<button ref={signOutRef} className="btn" type="button" disabled={busy} onClick={handleSignOut}>
+					<button
+						ref={signOutRef}
+						className="btn"
+						type="button"
+						disabled={busy}
+						onClick={handleSignOut}
+					>
 						Salir
 					</button>
 				</div>
@@ -100,7 +118,9 @@ export default function AuthPanel({ open, onAnnouncement }) {
 						onChange={(event) => setEmail(event.target.value)}
 						disabled={loading || busy}
 					/>
-					<label htmlFor="auth-password">Contraseña (mínimo 6 caracteres)</label>
+					<label htmlFor="auth-password">
+						Contraseña (mínimo 6 caracteres)
+					</label>
 					<input
 						id="auth-password"
 						type="password"
@@ -111,14 +131,29 @@ export default function AuthPanel({ open, onAnnouncement }) {
 						disabled={loading || busy}
 					/>
 					<div className="acts" style={{ margin: "10px 0" }}>
-						<button className="btn" type="button" disabled={loading || busy} onClick={handleSignIn}>
+						<button
+							className="btn"
+							type="button"
+							disabled={loading || busy}
+							onClick={handleSignIn}
+						>
 							Ingresar
 						</button>
-						<button className="btn" type="button" disabled={loading || busy} onClick={handleSignUp}>
+						<button
+							className="btn"
+							type="button"
+							disabled={loading || busy}
+							onClick={handleSignUp}
+						>
 							Crear cuenta
 						</button>
 					</div>
-					<button className="x" type="button" disabled={loading || busy} onClick={handleReset}>
+					<button
+						className="x"
+						type="button"
+						disabled={loading || busy}
+						onClick={handleReset}
+					>
 						Olvidé mi contraseña
 					</button>
 				</div>

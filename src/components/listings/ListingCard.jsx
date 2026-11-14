@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { CFG } from "../../config.js";
 import { deleteListing, updateListing } from "../../services/listings.js";
-import { setModeration, setSellerVerification } from "../../services/moderation.js";
+import {
+	setModeration,
+	setSellerVerification,
+} from "../../services/moderation.js";
 import { createReport } from "../../services/reports.js";
 import { getRatingSummary } from "../reviews/RatingSummary.jsx";
 import ReviewPanel from "../reviews/ReviewPanel.jsx";
@@ -39,7 +42,11 @@ export default function ListingCard({
 	const [paymentOpen, setPaymentOpen] = useState(false);
 	const state = moderation[listing.id] || {};
 	const canManage = isAdmin || (!!uid && listing.owner === uid);
-	const photos = listing.photos?.length ? listing.photos : listing.photo ? [listing.photo] : [];
+	const photos = listing.photos?.length
+		? listing.photos
+		: listing.photo
+			? [listing.photo]
+			: [];
 	const whatsapp = String(listing.wa || "").replace(/\D/g, "");
 	const rating = getRatingSummary(reviews, listing.owner);
 	const paymentEnabled = !!(CFG.precio && (CFG.alias || CFG.link) && CFG.wa);
@@ -59,9 +66,17 @@ export default function ListingCard({
 		const title = `${listing.title} - $${Number(listing.price).toLocaleString("es-AR")} en La Casa del Judoka`;
 		try {
 			if (navigator.share) {
-				await navigator.share({ title, text: title, url: window.location.href });
+				await navigator.share({
+					title,
+					text: title,
+					url: window.location.href,
+				});
 			} else {
-				window.open(`https://wa.me/?text=${encodeURIComponent(`${title} ${window.location.href}`)}`, "_blank", "noopener");
+				window.open(
+					`https://wa.me/?text=${encodeURIComponent(`${title} ${window.location.href}`)}`,
+					"_blank",
+					"noopener",
+				);
 			}
 		} catch (error) {
 			if (error?.name !== "AbortError") {
@@ -72,7 +87,10 @@ export default function ListingCard({
 	};
 
 	const handleReport = async () => {
-		if (!window.confirm("¿Querés denunciar esta publicación? La vamos a revisar.")) return;
+		if (
+			!window.confirm("¿Querés denunciar esta publicación? La vamos a revisar.")
+		)
+			return;
 		await runAction(
 			() =>
 				createReport(makeReportId(), {
@@ -105,19 +123,26 @@ export default function ListingCard({
 	const handleApproval = () =>
 		runAction(
 			() => setModeration(listing.id, { approved: state.approved !== true }),
-			state.approved === true ? "Publicación ocultada." : "Publicación aprobada.",
+			state.approved === true
+				? "Publicación ocultada."
+				: "Publicación aprobada.",
 			"No se pudo actualizar la aprobación.",
 		);
 
 	const handleVerification = () =>
 		runAction(
-			() => setSellerVerification(listing.owner, !verified, listing.seller || ""),
-			verified ? "Se quitó la verificación del vendedor." : "Vendedor verificado.",
+			() =>
+				setSellerVerification(listing.owner, !verified, listing.seller || ""),
+			verified
+				? "Se quitó la verificación del vendedor."
+				: "Vendedor verificado.",
 			"No se pudo actualizar la verificación.",
 		);
 
 	return (
-		<article className={`card${listing.sold ? " sold" : ""}${state.featured ? " feat" : ""}`}>
+		<article
+			className={`card${listing.sold ? " sold" : ""}${state.featured ? " feat" : ""}`}
+		>
 			<div
 				className={`ph${photos.length > 1 ? " g" : ""}`}
 				{...(photos.length > 1
@@ -130,13 +155,17 @@ export default function ListingCard({
 			>
 				{listing.sold && <span className="badge">Vendido</span>}
 				{state.featured && <span className="badge f">Destacado</span>}
-				{state.approved !== true && <span className="badge f">En revisión</span>}
+				{state.approved !== true && (
+					<span className="badge f">En revisión</span>
+				)}
 				{photos.length ? (
 					photos.map((photo, index) => (
 						<img
 							key={`${listing.id}-${index}`}
 							alt={`${listing.alt || `Foto de ${listing.title}`}${
-								photos.length > 1 ? ` (foto ${index + 1} de ${photos.length})` : ""
+								photos.length > 1
+									? ` (foto ${index + 1} de ${photos.length})`
+									: ""
 							}`}
 							loading="lazy"
 							src={photo}
@@ -147,7 +176,9 @@ export default function ListingCard({
 				)}
 			</div>
 			<div className="b">
-				<div className="pr">${Number(listing.price).toLocaleString("es-AR")}</div>
+				<div className="pr">
+					${Number(listing.price).toLocaleString("es-AR")}
+				</div>
 				<div>{listing.title}</div>
 				<div className="m">
 					Talle {listing.size} · {listing.cond}
@@ -182,7 +213,12 @@ export default function ListingCard({
 					</a>
 				)}
 				<div className="acts">
-					<button className="x" type="button" aria-label={`Compartir: ${listing.title}`} onClick={handleShare}>
+					<button
+						className="x"
+						type="button"
+						aria-label={`Compartir: ${listing.title}`}
+						onClick={handleShare}
+					>
 						Compartir
 					</button>
 					<button
@@ -221,12 +257,16 @@ export default function ListingCard({
 								onClick={() =>
 									runAction(
 										() => updateListing(listing.id, { sold: !listing.sold }),
-										listing.sold ? "Publicación disponible." : "Publicación marcada como vendida.",
+										listing.sold
+											? "Publicación disponible."
+											: "Publicación marcada como vendida.",
 										"No se pudo actualizar la publicación.",
 									)
 								}
 							>
-								{listing.sold ? "Marcar como disponible" : "Marcar como vendido"}
+								{listing.sold
+									? "Marcar como disponible"
+									: "Marcar como vendido"}
 							</button>
 							<button
 								className="x"
@@ -236,18 +276,21 @@ export default function ListingCard({
 							>
 								Eliminar publicación
 							</button>
-							{paymentEnabled && uid === listing.owner && !state.featured && !listing.sold && (
-								<button
-									className="x"
-									type="button"
-									aria-expanded={paymentOpen}
-									aria-controls={`payment-${listing.id}`}
-									aria-label={`Destacar publicación: ${listing.title}`}
-									onClick={() => setPaymentOpen((current) => !current)}
-								>
-									Destacar mi publicación
-								</button>
-							)}
+							{paymentEnabled &&
+								uid === listing.owner &&
+								!state.featured &&
+								!listing.sold && (
+									<button
+										className="x"
+										type="button"
+										aria-expanded={paymentOpen}
+										aria-controls={`payment-${listing.id}`}
+										aria-label={`Destacar publicación: ${listing.title}`}
+										onClick={() => setPaymentOpen((current) => !current)}
+									>
+										Destacar mi publicación
+									</button>
+								)}
 							{isAdmin && (
 								<>
 									<button
@@ -256,7 +299,9 @@ export default function ListingCard({
 										aria-label={`${state.approved ? "Ocultar publicación" : "Aprobar publicación"}: ${listing.title}`}
 										onClick={handleApproval}
 									>
-										{state.approved ? "Ocultar publicación" : "Aprobar publicación"}
+										{state.approved
+											? "Ocultar publicación"
+											: "Aprobar publicación"}
 									</button>
 									{listing.owner && (
 										<button
@@ -280,9 +325,15 @@ export default function ListingCard({
 					)}
 				</div>
 				{paymentOpen && (
-					<div id={`payment-${listing.id}`} className="pay" role="region" aria-label="Cómo destacar la publicación">
+					<div
+						id={`payment-${listing.id}`}
+						className="pay"
+						role="region"
+						aria-label="Cómo destacar la publicación"
+					>
 						<p>
-							Destacar cuesta <b>${CFG.precio}</b>. Tu publicación aparece primera y con etiqueta «Destacado».
+							Destacar cuesta <b>${CFG.precio}</b>. Tu publicación aparece
+							primera y con etiqueta «Destacado».
 						</p>
 						<p>
 							1. Pagá{" "}

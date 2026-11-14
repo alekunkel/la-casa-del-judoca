@@ -23,9 +23,15 @@ export function setModeration(id, changes) {
 }
 
 export function subscribeModeration(onData, onError) {
-	return onSnapshot(moderation, (snapshot) => {
-		onData(Object.fromEntries(snapshot.docs.map((item) => [item.id, item.data()])));
-	}, onError);
+	return onSnapshot(
+		moderation,
+		(snapshot) => {
+			onData(
+				Object.fromEntries(snapshot.docs.map((item) => [item.id, item.data()])),
+			);
+		},
+		onError,
+	);
 }
 
 export function setSellerVerification(uid, verified, name) {
@@ -33,7 +39,13 @@ export function setSellerVerification(uid, verified, name) {
 }
 
 export function subscribeSellers(onData, onError) {
-	return onSnapshot(sellers, (snapshot) => {
-		onData(Object.fromEntries(snapshot.docs.map((item) => [item.id, item.data()])));
-	}, onError);
+	return onSnapshot(
+		sellers,
+		(snapshot) => {
+			onData(
+				Object.fromEntries(snapshot.docs.map((item) => [item.id, item.data()])),
+			);
+		},
+		onError,
+	);
 }

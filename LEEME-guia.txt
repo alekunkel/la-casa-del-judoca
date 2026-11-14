@@ -1,114 +1,131 @@
-LA CASA DEL JUDOKA - GUÍA PARA SUBIRLA A UN SERVIDOR PROPIO
-============================================================
+LA CASA DEL JUDOKA - GUÍA PARA PUBLICAR LA APLICACIÓN
+====================================================
 
-La página está hecha con React y Vite. El código de la aplicación está en
-src/ y firestore.rules contiene las reglas de seguridad de la base de datos.
+La aplicación está hecha con React y Vite. Firebase guarda las cuentas, las
+publicaciones, las búsquedas y las opiniones. Esta guía explica cómo preparar
+una publicación nueva; no hace falta editar el código para pegar credenciales.
 
-Qué vas a usar:
-- Firebase (de Google): guarda las cuentas, los productos, las búsquedas y las opiniones.
-- Node.js y npm para instalar dependencias y generar la versión para publicar.
-- Un hosting para publicar el contenido de dist/ (abajo explico opciones).
-- Un dominio, si querés una dirección propia.
+IMPORTANTE
+----------
+- No compartas contraseñas ni archivos de credenciales de Firebase.
+- La configuración de Firebase para la web se guarda en variables de entorno.
+  La clave web no es una contraseña, pero no se deben subir archivos .env.local
+  al repositorio.
+- El modo de desarrollo se conecta siempre a emuladores locales; no modifica
+  Firebase real. Las reglas propuestas en firestore.rules.v2 son solo para
+  revisión y pruebas locales: no las publiques sin una revisión humana.
+- No publiques la aplicación ni cambies reglas, dominios o planes de pago sin
+  la aprobación de la persona responsable.
 
-IMPORTANTE: `npm run build` comprueba que la aplicación compile, pero no
-reemplaza una prueba de registro, inicio de sesión y publicaciones con tu
-proyecto de Firebase. Si algo falla, anotá el mensaje exacto para poder
-diagnosticarlo.
-
-Los nombres de los botones y menús de Firebase pueden haber cambiado.
-Si algo no coincide, buscá la opción más parecida.
-
-
-PARTE 1 - CREAR EL PROYECTO EN FIREBASE
----------------------------------------
-1. Entrá a https://console.firebase.google.com con tu cuenta de Google.
-2. Elegí "Crear un proyecto" (o "Agregar proyecto"). Ponele un nombre, por ejemplo "casa-del-judoka".
-   Google Analytics no hace falta: podés desactivarlo.
-3. Dentro del proyecto, agregá una app web (el ícono que parece "</>").
-   Ponele un nombre. NO marques "Firebase Hosting" por ahora.
-4. Te muestra un bloque de texto llamado "firebaseConfig" con cuatro datos:
-   apiKey, authDomain, projectId y appId. Copialos.
-
-PARTE 2 - ACTIVAR EL REGISTRO POR CORREO
-----------------------------------------
-1. En el menú, entrá a "Authentication" y tocá "Comenzar".
-2. En "Método de acceso", elegí "Correo electrónico/contraseña" y activalo. Guardá.
-
-PARTE 3 - CREAR LA BASE DE DATOS Y PEGAR LAS REGLAS
----------------------------------------------------
-1. En el menú, entrá a "Firestore Database" y tocá "Crear base de datos".
-2. Elegí el modo de producción. En ubicación, elegí una cercana, por ejemplo southamerica-east1 (São Paulo).
-3. Cuando esté creada, entrá a la pestaña "Reglas".
-4. Borrá todo lo que haya y pegá el contenido completo del archivo firestore.rules.
-5. Tocá "Publicar".
-
-PARTE 4 - CONFIGURAR LA APLICACIÓN
---------------------------------------
-1. Abrí src/firebase.js con un editor de texto (Bloc de notas o VS Code).
-2. Revisá el objeto "FB" y completá apiKey, authDomain, projectId, storageBucket,
-   messagingSenderId y appId con los datos de tu proyecto Firebase.
-   Es normal que la apiKey quede a la vista: la seguridad la dan las reglas del paso anterior.
-3. Buscá "ADMIN_EMAILS". Ya tiene los correos autorizados.
-   Si lo cambiás, también tenés que cambiarlo en firestore.rules.
-4. Buscá "const CFG" en src/legacy.js para revisar tu alias, WhatsApp, Instagram y monto.
-
-PARTE 5 - PUBLICAR LA PÁGINA (HOSTING)
---------------------------------------
-1. Instalá Node.js desde https://nodejs.org si todavía no lo tenés.
-2. En una terminal, abrí esta carpeta y ejecutá:
-   npm install
-   npm run build
-3. Se genera la carpeta dist/. Publicá su contenido en Netlify, Cloudflare Pages,
-   GitHub Pages o Firebase Hosting. Si el hosting permite configurar comandos,
-   usá "npm run build" como comando de compilación y "dist" como carpeta de salida.
-
-Otras opciones parecidas: Cloudflare Pages, GitHub Pages o Firebase Hosting.
-
-Después de publicar, volvé a Firebase:
-- Authentication > Configuración > Dominios autorizados > Agregar dominio.
-- Agregá la dirección que te dio el hosting (y más adelante tu dominio propio).
-
-PARTE 6 - TU CUENTA DE ADMINISTRADOR
-------------------------------------
-1. Abrí tu página publicada. Tocá "Ingresar" (arriba) y después "Crear cuenta"
-   con davidjudo.23@gmail.com y una contraseña.
-   Hacelo vos PRIMERO, antes de pasarle el link a nadie.
-2. Te llega un correo para confirmar tu dirección. Abrí el enlace.
-3. Volvé a la página, tocá "Salir" y volvé a ingresar.
-4. Ahora ves el panel del administrador, los botones de aprobar y los de destacar.
-   Si no aparecen, es porque el correo todavía no está confirmado.
-
-PARTE 7 - EL DOMINIO PROPIO
+PARTE 1 - PREPARAR FIREBASE
 ---------------------------
-1. Comprá el dominio:
-   - .com.ar: en NIC Argentina, con "Trámites a distancia" (TAD). Necesitás CUIT o CUIL y clave fiscal.
-     Verificá el precio actual antes de pagar.
-   - .com: en un registrador como GoDaddy, Namecheap o Cloudflare.
-2. En el hosting (por ejemplo Netlify) buscá "Domain management" o "Dominios"
-   y elegí "Agregar dominio personalizado".
-3. El hosting te indica qué datos (DNS) cargar en el sitio donde compraste el dominio.
-   Seguí esas indicaciones. Puede tardar desde unos minutos hasta un día en funcionar.
-4. Agregá el dominio nuevo en Firebase, en "Dominios autorizados" (Parte 5).
+Si ya existe un proyecto Firebase para la aplicación, usá ese mismo proyecto.
+Si no existe, antes de crear uno pedí autorización a la persona responsable.
 
-QUÉ CAMBIA RESPECTO A LA VERSIÓN DE CLAUDE
-------------------------------------------
-- Cualquiera se registra con su correo y publica, sin cuenta de Claude.
-- Las fotos se guardan dentro de la base de datos, achicadas (hasta 4 por producto).
-  Es lo más simple y no pide tarjeta, pero no escala bien: con muchas publicaciones
-  la página se vuelve lenta. Cuando crezca, conviene pasar las fotos a Firebase Storage
-  (puede pedir activar un plan de pago con cuota gratis: verificá las condiciones).
-- Los datos de la versión de Claude no se pasan solos. Las publicaciones se vuelven a cargar.
+En Firebase Console:
+1. Abrí el proyecto aprobado y agregá o seleccioná una app web (ícono </>).
+2. En la configuración de la app copiá los valores apiKey, authDomain,
+   projectId, storageBucket, messagingSenderId y appId.
+3. En Authentication, activá el acceso por correo electrónico y contraseña.
+4. Confirmá que Firestore esté habilitado en la región elegida por la persona
+   responsable.
 
-LÍMITES QUE TENÉS QUE CONOCER
------------------------------
-- Las publicaciones "en revisión" se ocultan en la página, pero técnicamente la base
-  de datos las puede leer cualquier persona con conocimientos técnicos.
-  Para algo más estricto hace falta un servidor propio.
-- Las opiniones no se pueden comprobar contra una compra real.
-- Al guardar correos de personas, conviene sumar una política de privacidad y consultar
-  la ley de protección de datos personales de Argentina (Ley 25.326).
-  Yo no soy abogado: tomalo como orientación.
-- Los pagos con comisión automática (Mercado Pago) todavía no están: necesitan un servidor
-  con claves secretas. Sigue vigente el cobro por publicación destacada con tu alias.
-- Si alguna pantalla de Firebase o del hosting te resulta difícil con tu lector de pantalla,
-  pedile a alguien de confianza que te acompañe en ese paso.
+No pegues valores en archivos fuente. En una copia local del repositorio,
+creá `.env.local` a partir de `.env.example` y completá estas variables:
+
+- VITE_FIREBASE_API_KEY
+- VITE_FIREBASE_AUTH_DOMAIN
+- VITE_FIREBASE_PROJECT_ID
+- VITE_FIREBASE_STORAGE_BUCKET
+- VITE_FIREBASE_MESSAGING_SENDER_ID
+- VITE_FIREBASE_APP_ID
+
+El archivo `.env.local` está excluido de Git. No lo envíes por correo ni lo
+copies a un issue o conversación pública.
+
+PARTE 2 - DESARROLLO LOCAL
+--------------------------
+Instalá Node.js 22 LTS y abrí una terminal en la carpeta del proyecto.
+
+En una terminal ejecutá:
+  npm install
+  npm run emulators
+
+Dejá esa terminal abierta. En otra terminal, desde la misma carpeta, ejecutá:
+  npm run dev
+
+La aplicación local se conecta automáticamente a los emuladores Auth y
+Firestore en `127.0.0.1`; el identificador usado es `casa-del-judoca-dev`.
+La configuración local no envía cambios a Firebase real. Para apagar los
+emuladores, usá Ctrl+C en la terminal donde se iniciaron.
+
+Para compilar la aplicación:
+  npm run build
+
+Se genera la carpeta `dist/`. La compilación no sustituye la revisión manual
+ni confirma que las credenciales, reglas o flujos estén bien configurados.
+
+PARTE 3 - REVISAR SEGURIDAD ANTES DE PUBLICAR
+---------------------------------------------
+Antes de publicar, la persona responsable debe revisar:
+- Las reglas actuales de `firestore.rules` y el comportamiento esperado.
+- Los dominios autorizados de Firebase Authentication.
+- Las restricciones de la clave web y App Check.
+- La política de privacidad y el tratamiento de datos personales.
+- El estado de las publicaciones pendientes y la privacidad de las fotos.
+
+`firestore.rules.v2` es una propuesta separada; no la copies sobre las reglas
+del proyecto real. Las reglas de Storage también requieren revisión. Consultá
+`docs/SEGURIDAD.md`, `docs/PLAN_FOTOS_STORAGE.md` y `docs/ACCESIBILIDAD.md`.
+
+PARTE 4 - PUBLICAR LA APLICACIÓN
+--------------------------------
+La publicación requiere aprobación de la persona responsable. El proveedor de
+hosting debe tener configuradas las seis variables `VITE_FIREBASE_*` de la
+Parte 1. Configurá el comando `npm run build` y la carpeta de salida `dist`.
+Podés usar Firebase Hosting u otro proveedor compatible con una aplicación
+Vite. Para rutas internas, el hosting debe redirigir las solicitudes a
+`index.html`.
+
+No ejecutes `firebase deploy` desde una máquina local sin confirmar el proyecto
+activo, revisar las reglas y recibir autorización expresa. Después de publicar,
+la persona responsable agrega el dominio de producción a los dominios
+autorizados de Firebase Authentication.
+
+PARTE 5 - CUENTA ADMINISTRADORA
+-------------------------------
+La lista de correos administradores está en `src/config.js`; la autorización
+requiere correo verificado. La persona responsable debe revisar y aprobar los
+correos antes de publicar. No edites reglas para agregar una cuenta sin revisar
+la configuración correspondiente.
+
+Cuando la aplicación esté publicada y aprobada:
+1. La persona responsable crea su cuenta con un correo autorizado.
+2. Abre el mensaje de verificación y confirma la dirección.
+3. Cierra sesión y vuelve a ingresar.
+4. Comprueba que aparezca el panel de administración.
+
+QUÉ CAMBIÓ
+----------
+- La interfaz ahora está formada por componentes React; ya no depende de
+  `src/legacy.js` ni `src/page.html`.
+- Firebase se importa como dependencia npm y su configuración se lee de
+  variables de entorno.
+- El modo de desarrollo usa emuladores locales. No uses cuentas o datos reales
+  para probar.
+- Los datos se mantienen en Firestore; las fotos todavía se guardan como
+  imágenes reducidas dentro de los documentos (hasta cuatro por publicación).
+  Consultá `docs/PLAN_FOTOS_STORAGE.md` antes de cambiar ese diseño.
+
+LÍMITES Y PENDIENTES
+--------------------
+- La validación con lector de pantalla debe hacerla una persona; hay un guion
+  en `docs/ACCESIBILIDAD.md`.
+- Las reglas propuestas necesitan verificación en emuladores antes de
+  considerarlas para producción.
+- Las publicaciones pendientes, la privacidad de fotos, las opiniones y el
+  tratamiento de datos requieren una revisión de seguridad y privacidad.
+- Los pagos con comisión automática todavía no están implementados; requieren
+  un servidor que proteja las claves secretas.
+- Esta guía no es asesoramiento legal. Consultá a una persona profesional sobre
+  la Ley 25.326 y la política de privacidad.

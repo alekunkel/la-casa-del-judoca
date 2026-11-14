@@ -1,4 +1,10 @@
-import { collection, deleteDoc, doc, onSnapshot, setDoc } from "firebase/firestore";
+import {
+	collection,
+	deleteDoc,
+	doc,
+	onSnapshot,
+	setDoc,
+} from "firebase/firestore";
 import { db } from "../lib/firebase.js";
 
 const reports = collection(db, "reports");
@@ -12,7 +18,11 @@ export function deleteReport(id) {
 }
 
 export function subscribeReports(onData, onError) {
-	return onSnapshot(reports, (snapshot) => {
-		onData(snapshot.docs.map((item) => ({ id: item.id, ...item.data() })));
-	}, onError);
+	return onSnapshot(
+		reports,
+		(snapshot) => {
+			onData(snapshot.docs.map((item) => ({ id: item.id, ...item.data() })));
+		},
+		onError,
+	);
 }

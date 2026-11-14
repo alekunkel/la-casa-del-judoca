@@ -22,11 +22,15 @@ function readPreferences() {
 		const stored = JSON.parse(localStorage.getItem("a11y") || "{}");
 		const safePreferences = { ...defaults };
 		Object.keys(allowedValues).forEach((group) => {
-			if (allowedValues[group].includes(stored[group])) safePreferences[group] = stored[group];
+			if (allowedValues[group].includes(stored[group]))
+				safePreferences[group] = stored[group];
 		});
 		return { preferences: safePreferences, error: null };
 	} catch (error) {
-		console.error("No se pudieron leer las preferencias de accesibilidad.", error);
+		console.error(
+			"No se pudieron leer las preferencias de accesibilidad.",
+			error,
+		);
 		return { preferences: defaults, error };
 	}
 }
@@ -40,7 +44,10 @@ export function useA11yPrefs() {
 		try {
 			localStorage.setItem("a11y", JSON.stringify(preferences));
 		} catch (storageError) {
-			console.error("No se pudieron guardar las preferencias de accesibilidad.", storageError);
+			console.error(
+				"No se pudieron guardar las preferencias de accesibilidad.",
+				storageError,
+			);
 		}
 	}, [preferences]);
 

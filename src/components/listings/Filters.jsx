@@ -25,7 +25,14 @@ export function CategoryChips({ value, onChange }) {
 	);
 }
 
-export function Filters({ query, condition, sort, onQueryChange, onConditionChange, onSortChange }) {
+export function Filters({
+	query,
+	condition,
+	sort,
+	onQueryChange,
+	onConditionChange,
+	onSortChange,
+}) {
 	return (
 		<div className="tools">
 			<input
@@ -47,7 +54,11 @@ export function Filters({ query, condition, sort, onQueryChange, onConditionChan
 				<option>Buen estado</option>
 				<option>Con detalles</option>
 			</select>
-			<select aria-label="Ordenar" value={sort} onChange={(event) => onSortChange(event.target.value)}>
+			<select
+				aria-label="Ordenar"
+				value={sort}
+				onChange={(event) => onSortChange(event.target.value)}
+			>
 				<option value="new">Más nuevos</option>
 				<option value="lo">Menor precio</option>
 				<option value="hi">Mayor precio</option>
@@ -60,7 +71,8 @@ export function LoadingMessage({ loading, error, count, hasListings }) {
 	let message;
 	if (loading) message = "Cargando publicaciones…";
 	else if (error) message = "No se pudieron cargar las publicaciones.";
-	else if (count) message = `${count} ${count === 1 ? "producto" : "productos"}`;
+	else if (count)
+		message = `${count} ${count === 1 ? "producto" : "productos"}`;
 	else if (hasListings) message = "No hay resultados con esos filtros.";
 	else message = "Todavía no hay publicaciones. ¡Sé el primero en publicar!";
 	return (

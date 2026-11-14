@@ -13,10 +13,15 @@ export async function shrinkImage(file) {
 		context.fillRect(0, 0, canvas.width, canvas.height);
 		context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
 		bitmap.close();
-		const compressed = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.7));
+		const compressed = await new Promise((resolve) =>
+			canvas.toBlob(resolve, "image/jpeg", 0.7),
+		);
 		return compressed && compressed.size < file.size ? compressed : file;
 	} catch (error) {
-		console.error("No se pudo reducir la foto; se usará el archivo original.", error);
+		console.error(
+			"No se pudo reducir la foto; se usará el archivo original.",
+			error,
+		);
 		return file;
 	}
 }

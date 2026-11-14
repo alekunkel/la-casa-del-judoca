@@ -5,17 +5,19 @@ function PreferenceGroup({ id, label, values, preferences, onSelect }) {
 		<div className="ar">
 			<span id={id}>{label}</span>
 			<div role="group" aria-labelledby={id}>
-				{values.map(({ value, label: buttonLabel, toggle = false, group = id }) => (
-					<button
-						key={value || "normal"}
-						type="button"
-						data-g={group}
-						aria-pressed={preferences[group] === value}
-						onClick={() => onSelect(group, value, toggle)}
-					>
-						{buttonLabel}
-					</button>
-				))}
+				{values.map(
+					({ value, label: buttonLabel, toggle = false, group = id }) => (
+						<button
+							key={value || "normal"}
+							type="button"
+							data-g={group}
+							aria-pressed={preferences[group] === value}
+							onClick={() => onSelect(group, value, toggle)}
+						>
+							{buttonLabel}
+						</button>
+					),
+				)}
 			</div>
 		</div>
 	);
@@ -63,7 +65,12 @@ export default function A11yPanel({ open }) {
 				preferences={preferences}
 				onSelect={setPreference}
 				values={[
-					{ value: "sp", label: "Más espacio entre letras", toggle: true, group: "sp" },
+					{
+						value: "sp",
+						label: "Más espacio entre letras",
+						toggle: true,
+						group: "sp",
+					},
 					{ value: "ul", label: "Subrayar enlaces", toggle: true, group: "ul" },
 				]}
 			/>

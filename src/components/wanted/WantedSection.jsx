@@ -47,7 +47,11 @@ function WantedForm({ uid, isAdmin, onLoginRequest, onAnnouncement }) {
 			form.reset();
 			setOpen(false);
 			setStatus("");
-			onAnnouncement(isAdmin ? "Búsqueda publicada." : "¡Listo! Tu búsqueda aparece cuando la revisemos.");
+			onAnnouncement(
+				isAdmin
+					? "Búsqueda publicada."
+					: "¡Listo! Tu búsqueda aparece cuando la revisemos.",
+			);
 		} catch (error) {
 			console.error("No se pudo publicar la búsqueda.", error);
 			setStatus("No se pudo publicar. Probá de nuevo.");
@@ -67,10 +71,23 @@ function WantedForm({ uid, isAdmin, onLoginRequest, onAnnouncement }) {
 			>
 				Publicar lo que busco
 			</button>
-			<form id="wanted-form" className={open ? "on" : ""} style={{ marginTop: 12 }} hidden={!open} onSubmit={handleSubmit}>
+			<form
+				id="wanted-form"
+				className={open ? "on" : ""}
+				style={{ marginTop: 12 }}
+				hidden={!open}
+				onSubmit={handleSubmit}
+			>
 				<div className="f">
 					<label htmlFor="wanted-text">¿Qué buscás?</label>
-					<input ref={whatRef} id="wanted-text" name="text" required maxLength="100" placeholder="Ej: Judogi blanco talle 4" />
+					<input
+						ref={whatRef}
+						id="wanted-text"
+						name="text"
+						required
+						maxLength="100"
+						placeholder="Ej: Judogi blanco talle 4"
+					/>
 				</div>
 				<div>
 					<label htmlFor="wanted-name">Tu nombre</label>
@@ -82,7 +99,14 @@ function WantedForm({ uid, isAdmin, onLoginRequest, onAnnouncement }) {
 				</div>
 				<div className="f">
 					<label htmlFor="wanted-whatsapp">WhatsApp (con código de país)</label>
-					<input id="wanted-whatsapp" name="whatsapp" required maxLength="20" inputMode="tel" placeholder="5491122334455" />
+					<input
+						id="wanted-whatsapp"
+						name="whatsapp"
+						required
+						maxLength="20"
+						inputMode="tel"
+						placeholder="5491122334455"
+					/>
 				</div>
 				<div className="f">
 					<button className="btn" type="submit" disabled={busy}>
@@ -109,7 +133,10 @@ export default function WantedSection({
 }) {
 	const [message, setMessage] = useState("");
 	const visibleItems = items.filter(
-		(item) => moderation[item.id]?.approved === true || isAdmin || (!!uid && item.owner === uid),
+		(item) =>
+			moderation[item.id]?.approved === true ||
+			isAdmin ||
+			(!!uid && item.owner === uid),
 	);
 
 	const handleDelete = async (item) => {
@@ -126,7 +153,10 @@ export default function WantedSection({
 	return (
 		<section className="info" aria-labelledby="wanted-heading">
 			<h2 id="wanted-heading">Se busca</h2>
-			<p>¿Necesitás algo y no lo encontrás? Publicá lo que buscás y los vendedores te escriben.</p>
+			<p>
+				¿Necesitás algo y no lo encontrás? Publicá lo que buscás y los
+				vendedores te escriben.
+			</p>
 			<WantedForm
 				uid={uid}
 				isAdmin={isAdmin}
@@ -154,7 +184,9 @@ export default function WantedSection({
 								{item.name}
 								{item.city ? ` · ${item.city}` : ""}
 							</div>
-							{moderation[item.id]?.approved !== true && <div className="m">En revisión</div>}
+							{moderation[item.id]?.approved !== true && (
+								<div className="m">En revisión</div>
+							)}
 							<a
 								className="btn"
 								target="_blank"
@@ -168,7 +200,11 @@ export default function WantedSection({
 							</a>
 							{(isAdmin || (!!uid && item.owner === uid)) && (
 								<div className="acts">
-									<button className="x" type="button" onClick={() => handleDelete(item)}>
+									<button
+										className="x"
+										type="button"
+										onClick={() => handleDelete(item)}
+									>
 										Eliminar búsqueda
 										<span className="sr-only">: {item.text}</span>
 									</button>

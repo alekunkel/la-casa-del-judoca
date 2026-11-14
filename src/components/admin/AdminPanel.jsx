@@ -13,9 +13,15 @@ export default function AdminPanel({
 	onAnnouncement,
 }) {
 	if (!isAdmin) return null;
-	const pendingListings = listings.filter((listing) => moderation[listing.id]?.approved !== true);
-	const pendingWanted = wanted.filter((item) => moderation[item.id]?.approved !== true);
-	const featuredCount = listings.filter((listing) => moderation[listing.id]?.featured).length;
+	const pendingListings = listings.filter(
+		(listing) => moderation[listing.id]?.approved !== true,
+	);
+	const pendingWanted = wanted.filter(
+		(item) => moderation[item.id]?.approved !== true,
+	);
+	const featuredCount = listings.filter(
+		(listing) => moderation[listing.id]?.featured,
+	).length;
 	const summary = [
 		`${pendingListings.length} publicaciones por aprobar`,
 		`${pendingWanted.length} búsquedas por aprobar`,
@@ -46,7 +52,8 @@ export default function AdminPanel({
 				{pendingListings.map((listing) => (
 					<div key={listing.id} className="pay">
 						<p>
-							Publicación: {listing.title || ""} — {listing.seller || "sin nombre"}
+							Publicación: {listing.title || ""} —{" "}
+							{listing.seller || "sin nombre"}
 						</p>
 						<div className="acts">
 							<button

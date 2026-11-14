@@ -25,7 +25,11 @@ export function deleteListing(id) {
 }
 
 export function subscribeListings(onData, onError) {
-	return onSnapshot(query(listings, orderBy("ts", "desc")), (snapshot) => {
-		onData(snapshot.docs.map((item) => ({ id: item.id, ...item.data() })));
-	}, onError);
+	return onSnapshot(
+		query(listings, orderBy("ts", "desc")),
+		(snapshot) => {
+			onData(snapshot.docs.map((item) => ({ id: item.id, ...item.data() })));
+		},
+		onError,
+	);
 }

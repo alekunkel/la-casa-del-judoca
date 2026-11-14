@@ -11,7 +11,8 @@ export function fileToDataUrl(file) {
 			}
 			resolve(dataUrl);
 		};
-		reader.onerror = () => reject(reader.error ?? new Error("No se pudo leer la foto."));
+		reader.onerror = () =>
+			reject(reader.error ?? new Error("No se pudo leer la foto."));
 		reader.readAsDataURL(file);
 	});
 }

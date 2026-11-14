@@ -1,7 +1,9 @@
 const authMessages = {
 	"auth/invalid-email": "El correo no es válido.",
-	"auth/email-already-in-use": "Ese correo ya tiene una cuenta. Probá con Ingresar.",
-	"auth/weak-password": "La contraseña es muy corta. Usá al menos 6 caracteres.",
+	"auth/email-already-in-use":
+		"Ese correo ya tiene una cuenta. Probá con Ingresar.",
+	"auth/weak-password":
+		"La contraseña es muy corta. Usá al menos 6 caracteres.",
 	"auth/invalid-credential": "Correo o contraseña incorrectos.",
 	"auth/user-not-found": "Correo o contraseña incorrectos.",
 	"auth/wrong-password": "Correo o contraseña incorrectos.",

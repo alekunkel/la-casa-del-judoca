@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { createReview, deleteReview } from "../../services/reviews.js";
 
-export default function ReviewPanel({ listing, reviews, uid, isAdmin, onAnnouncement }) {
+export default function ReviewPanel({
+	listing,
+	reviews,
+	uid,
+	isAdmin,
+	onAnnouncement,
+}) {
 	const [rating, setRating] = useState("5");
 	const [name, setName] = useState("");
 	const [text, setText] = useState("");
@@ -47,7 +53,11 @@ export default function ReviewPanel({ listing, reviews, uid, isAdmin, onAnnounce
 	};
 
 	return (
-		<div className="pay rev" role="region" aria-label="Opiniones sobre el vendedor">
+		<div
+			className="pay rev"
+			role="region"
+			aria-label="Opiniones sobre el vendedor"
+		>
 			{visibleReviews.length ? (
 				visibleReviews.map((review) => (
 					<div key={review.id}>
@@ -56,9 +66,16 @@ export default function ReviewPanel({ listing, reviews, uid, isAdmin, onAnnounce
 							{review.text ? `: ${review.text}` : ""}
 						</p>
 						{isAdmin && (
-							<button type="button" className="x" onClick={() => handleDelete(review)}>
+							<button
+								type="button"
+								className="x"
+								onClick={() => handleDelete(review)}
+							>
 								Borrar opinión
-								<span className="sr-only"> de {review.name || "comprador"}</span>
+								<span className="sr-only">
+									{" "}
+									de {review.name || "comprador"}
+								</span>
 							</button>
 						)}
 					</div>
@@ -91,7 +108,9 @@ export default function ReviewPanel({ listing, reviews, uid, isAdmin, onAnnounce
 						value={name}
 						onChange={(event) => setName(event.target.value)}
 					/>
-					<label htmlFor={`review-text-${listing.id}`}>Comentario (opcional)</label>
+					<label htmlFor={`review-text-${listing.id}`}>
+						Comentario (opcional)
+					</label>
 					<input
 						id={`review-text-${listing.id}`}
 						maxLength="200"

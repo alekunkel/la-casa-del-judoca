@@ -46,14 +46,23 @@ export function AuthProvider({ children }) {
 			isAdmin,
 			loading,
 			errorMessage,
-			signIn: (email, password) => signInWithEmailAndPassword(auth, email, password),
+			signIn: (email, password) =>
+				signInWithEmailAndPassword(auth, email, password),
 			signUp: async (email, password) => {
-				const result = await createUserWithEmailAndPassword(auth, email, password);
+				const result = await createUserWithEmailAndPassword(
+					auth,
+					email,
+					password,
+				);
 				try {
 					await sendEmailVerification(result.user);
 					return { user: result.user, verificationSent: true };
 				} catch (error) {
-					return { user: result.user, verificationSent: false, verificationError: error };
+					return {
+						user: result.user,
+						verificationSent: false,
+						verificationError: error,
+					};
 				}
 			},
 			resetPassword: (email) => sendPasswordResetEmail(auth, email),

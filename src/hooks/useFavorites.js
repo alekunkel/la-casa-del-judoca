@@ -3,7 +3,10 @@ import { useEffect, useState } from "react";
 function readFavorites() {
 	try {
 		const stored = JSON.parse(localStorage.getItem("fav") || "[]");
-		if (!Array.isArray(stored) || stored.some((item) => typeof item !== "string")) {
+		if (
+			!Array.isArray(stored) ||
+			stored.some((item) => typeof item !== "string")
+		) {
 			throw new Error("Los favoritos guardados tienen un formato inválido.");
 		}
 		return { favorites: stored, error: null };
@@ -27,7 +30,9 @@ export function useFavorites() {
 
 	const toggleFavorite = (id) => {
 		setFavorites((current) =>
-			current.includes(id) ? current.filter((favorite) => favorite !== id) : [...current, id],
+			current.includes(id)
+				? current.filter((favorite) => favorite !== id)
+				: [...current, id],
 		);
 	};
 

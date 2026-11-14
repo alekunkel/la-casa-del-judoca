@@ -82,11 +82,31 @@
 
 ## Fase 7: pruebas y CI
 
-- Pendientes: agregar pruebas de componentes/contexto, flujos Playwright y el
-  workflow de CI. No se ejecutó ningún test.
+- Se agregaron tests unitarios con Vitest y Testing Library para tarjeta,
+  filtros, hooks de favoritos/accesibilidad, imágenes y autenticación.
+- Se agregaron tests de reglas para Firestore y cuatro flujos Playwright con
+  emuladores locales; se configuraron scripts separados para ejecutarlos.
+- Se agregó `.github/workflows/ci.yml` para ejecutar `npm ci`, lint, tests
+  unitarios y build en push y pull request.
+- Por pedido explícito, no se ejecutaron tests unitarios, de reglas ni E2E;
+  tampoco se iniciaron emuladores. CI no tiene resultados aún.
 
 ## Fase 8: cierre
 
-- Pendientes: actualizar la guía de despliegue, revisar el bundle y abrir el PR.
-- No se hizo despliegue, no se aplicaron reglas y no se escribieron datos en
-  Firebase.
+- Se actualizaron `README.md` y `LEEME-guia.txt` con variables de entorno,
+  comandos y el uso de emuladores; la guía mantiene separados los pasos de
+  desarrollo y producción.
+- El modo de desarrollo se conecta automáticamente a Auth y Firestore
+  emulados, con el id local `casa-del-judoca-dev`. La compilación de producción
+  conserva el id configurado por entorno.
+- Para reducir el chunk de entrada, se separaron los paquetes de React y
+  Firebase, y el panel de administración se carga de forma diferida con
+  `React.lazy`; el build de cierre pasó y todos los chunks quedaron por debajo
+  de 500 kB (el mayor es `firebase-firestore`, 229,82 kB sin gzip).
+- `npm run lint` y `npm run build` pasaron después del formateo. No se ejecutó
+  ningún comando de pruebas.
+- La validación manual con NVDA/VoiceOver y la verificación de reglas en
+  emulador siguen pendientes.
+- No se desplegó, no se publicaron reglas, no se crearon proyectos y no se
+  escribieron datos en Firebase.
+- Pendiente: crear y publicar el pull request hacia `main`.

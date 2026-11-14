@@ -29,11 +29,15 @@ export default function ListingGrid({
 			const visible = approved || isAdmin || (!!uid && listing.owner === uid);
 			const categoryMatches =
 				!category ||
-				(category === "__fav" ? favorites.includes(listing.id) : (listing.cat || "Judogis") === category);
+				(category === "__fav"
+					? favorites.includes(listing.id)
+					: (listing.cat || "Judogis") === category);
 			const conditionMatches = !condition || listing.cond === condition;
 			const searchMatches =
 				!normalizedQuery ||
-				`${String(listing.title || "")} ${String(listing.size || "")}`.toLowerCase().includes(normalizedQuery);
+				`${String(listing.title || "")} ${String(listing.size || "")}`
+					.toLowerCase()
+					.includes(normalizedQuery);
 			return visible && categoryMatches && conditionMatches && searchMatches;
 		});
 		if (sort !== "new") {
@@ -45,7 +49,17 @@ export default function ListingGrid({
 			...result.filter((listing) => moderation[listing.id]?.featured),
 			...result.filter((listing) => !moderation[listing.id]?.featured),
 		];
-	}, [category, condition, favorites, isAdmin, listings, moderation, query, sort, uid]);
+	}, [
+		category,
+		condition,
+		favorites,
+		isAdmin,
+		listings,
+		moderation,
+		query,
+		sort,
+		uid,
+	]);
 
 	const availableCount = listings.filter(
 		(listing) => !listing.sold && moderation[listing.id]?.approved === true,

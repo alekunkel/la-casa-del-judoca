@@ -14,15 +14,33 @@ export function useCollection(subscribeFn) {
 		try {
 			unsubscribe = subscribeFn(
 				(nextData) => {
-					if (active) setResult({ source: subscribeFn, data: nextData, loading: false, error: null });
+					if (active)
+						setResult({
+							source: subscribeFn,
+							data: nextData,
+							loading: false,
+							error: null,
+						});
 				},
 				(nextError) => {
-					if (active) setResult({ source: subscribeFn, data: [], loading: false, error: nextError });
+					if (active)
+						setResult({
+							source: subscribeFn,
+							data: [],
+							loading: false,
+							error: nextError,
+						});
 				},
 			);
 		} catch (nextError) {
 			queueMicrotask(() => {
-				if (active) setResult({ source: subscribeFn, data: [], loading: false, error: nextError });
+				if (active)
+					setResult({
+						source: subscribeFn,
+						data: [],
+						loading: false,
+						error: nextError,
+					});
 			});
 		}
 		return () => {
@@ -31,6 +49,7 @@ export function useCollection(subscribeFn) {
 		};
 	}, [subscribeFn]);
 
-	if (result.source !== subscribeFn) return { data: [], loading: true, error: null };
+	if (result.source !== subscribeFn)
+		return { data: [], loading: true, error: null };
 	return { data: result.data, loading: result.loading, error: result.error };
 }

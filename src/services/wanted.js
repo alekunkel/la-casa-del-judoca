@@ -20,7 +20,11 @@ export function deleteWanted(id) {
 }
 
 export function subscribeWanted(onData, onError) {
-	return onSnapshot(query(wanted, orderBy("ts", "desc")), (snapshot) => {
-		onData(snapshot.docs.map((item) => ({ id: item.id, ...item.data() })));
-	}, onError);
+	return onSnapshot(
+		query(wanted, orderBy("ts", "desc")),
+		(snapshot) => {
+			onData(snapshot.docs.map((item) => ({ id: item.id, ...item.data() })));
+		},
+		onError,
+	);
 }

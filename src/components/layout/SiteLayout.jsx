@@ -20,16 +20,33 @@ export function Header({
 	return (
 		<>
 			<div className="acc">
-				<button type="button" aria-expanded={accountOpen} aria-controls="auth" onClick={onToggleAccount}>
+				<button
+					type="button"
+					aria-expanded={accountOpen}
+					aria-controls="auth"
+					onClick={onToggleAccount}
+				>
 					{accountOpen || signedIn ? "Mi cuenta" : "Ingresar"}
 				</button>
-				<button type="button" aria-expanded={a11yOpen} aria-controls="a11y-panel" onClick={onToggleA11y}>
+				<button
+					type="button"
+					aria-expanded={a11yOpen}
+					aria-controls="a11y-panel"
+					onClick={onToggleA11y}
+				>
 					<span aria-hidden="true">♿ </span>Accesibilidad
 				</button>
 			</div>
 			{children}
 			<header>
-				<svg className="logo" viewBox="0 0 96 96" width="84" height="84" aria-hidden="true" focusable="false">
+				<svg
+					className="logo"
+					viewBox="0 0 96 96"
+					width="84"
+					height="84"
+					aria-hidden="true"
+					focusable="false"
+				>
 					<circle cx="48" cy="48" r="46" fill="var(--ac2)" />
 					<path
 						d="M30 20 48 32 66 20 86 38 76 50 68 44V74H28V44L20 50 10 38Z"
@@ -46,9 +63,30 @@ export function Header({
 						strokeLinecap="round"
 					/>
 					<rect x="26" y="57" width="44" height="9" rx="2" fill="#111" />
-					<path className="t1" d="M48 66 40 86" stroke="#111" strokeWidth="6" strokeLinecap="round" />
-					<path className="t2" d="M48 66 56 86" stroke="#111" strokeWidth="6" strokeLinecap="round" />
-					<rect x="42" y="54" width="12" height="15" rx="2" fill="#111" stroke="#fff" strokeWidth="1.5" />
+					<path
+						className="t1"
+						d="M48 66 40 86"
+						stroke="#111"
+						strokeWidth="6"
+						strokeLinecap="round"
+					/>
+					<path
+						className="t2"
+						d="M48 66 56 86"
+						stroke="#111"
+						strokeWidth="6"
+						strokeLinecap="round"
+					/>
+					<rect
+						x="42"
+						y="54"
+						width="12"
+						height="15"
+						rx="2"
+						fill="#111"
+						stroke="#fff"
+						strokeWidth="1.5"
+					/>
 				</svg>
 				<h1>
 					La Casa del <span>Judoka</span>
@@ -91,8 +129,8 @@ export function HowItWorks() {
 export function Footer() {
 	return (
 		<footer>
-			La Casa del Judoka es una comunidad de judokas. Encontrate en lugares públicos y revisá el estado del
-			producto antes de pagar.
+			La Casa del Judoka es una comunidad de judokas. Encontrate en lugares
+			públicos y revisá el estado del producto antes de pagar.
 		</footer>
 	);
 }
@@ -136,8 +174,9 @@ export function About() {
 		<section className="info" aria-labelledby="about-title">
 			<h2 id="about-title">Quiénes somos</h2>
 			<p>
-				Soy David Gómez, judoka paralímpico. Creé esta página para que todos los judokas encontremos en un mismo
-				lugar lo que estamos buscando para entrenar y competir.
+				Soy David Gómez, judoka paralímpico. Creé esta página para que todos los
+				judokas encontremos en un mismo lugar lo que estamos buscando para
+				entrenar y competir.
 			</p>
 			<p className="bar2">
 				<a className="btn" href="mailto:davidjudo.23@gmail.com">
@@ -164,7 +203,10 @@ export function BuyingHelp() {
 			<h2 id="buying-help-title">Ayuda para comprar y vender</h2>
 			<details>
 				<summary>Guía de talles de judogi</summary>
-				<p>Es una guía aproximada. Cada marca es distinta, así que mirá también la tabla del fabricante.</p>
+				<p>
+					Es una guía aproximada. Cada marca es distinta, así que mirá también
+					la tabla del fabricante.
+				</p>
 				<table>
 					<caption>Talle según la altura</caption>
 					<thead>
@@ -183,8 +225,8 @@ export function BuyingHelp() {
 					</tbody>
 				</table>
 				<p>
-					Las mangas deben llegar a la muñeca y el pantalón al tobillo. Si es de algodón, puede encogerse un
-					poco al lavarlo.
+					Las mangas deben llegar a la muñeca y el pantalón al tobillo. Si es de
+					algodón, puede encogerse un poco al lavarlo.
 				</p>
 			</details>
 			<details>
@@ -224,14 +266,26 @@ export function BuyingHelp() {
 				<summary>Términos y condiciones</summary>
 				<ul>
 					<li>
-						La Casa del Judoka es un espacio para que los judokas se encuentren. Cada compra y venta es un
-						trato entre comprador y vendedor.
+						La Casa del Judoka es un espacio para que los judokas se encuentren.
+						Cada compra y venta es un trato entre comprador y vendedor.
 					</li>
-					<li>Publicar es gratis. Destacar una publicación tiene un costo que se informa antes de pagar.</li>
-					<li>Cada vendedor es responsable de lo que publica: fotos reales, estado y precio verdaderos.</li>
-					<li>Las opiniones deben ser de compradores reales y respetuosas. Podemos borrar las que no lo sean.</li>
+					<li>
+						Publicar es gratis. Destacar una publicación tiene un costo que se
+						informa antes de pagar.
+					</li>
+					<li>
+						Cada vendedor es responsable de lo que publica: fotos reales, estado
+						y precio verdaderos.
+					</li>
+					<li>
+						Las opiniones deben ser de compradores reales y respetuosas. Podemos
+						borrar las que no lo sean.
+					</li>
 					<li>Revisamos cada publicación antes de mostrarla.</li>
-					<li>Podemos sacar publicaciones que no cumplan estas reglas o que hayan sido denunciadas.</li>
+					<li>
+						Podemos sacar publicaciones que no cumplan estas reglas o que hayan
+						sido denunciadas.
+					</li>
 				</ul>
 			</details>
 		</section>

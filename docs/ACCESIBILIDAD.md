@@ -46,8 +46,8 @@ Firebase. No usar una cuenta ni datos de producción.
 ## Registro del resultado
 
 | Lector y navegador | Fecha | Resultado | Observaciones |
-| --- | --- | --- | --- |
-|  |  | Pendiente |  |
+| ------------------ | ----- | --------- | ------------- |
+|                    |       | Pendiente |               |
 
 Esta guía es un guion para una persona; no reemplaza la revisión con tecnologías
 de asistencia ni constituye una certificación de accesibilidad.
