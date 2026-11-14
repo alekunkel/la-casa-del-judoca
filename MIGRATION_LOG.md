@@ -25,6 +25,17 @@
   sesión se quitaron; el estado de usuario se actualiza mediante una
   suscripción explícita.
 - La compilación y el lint pasaron. No se ejecutaron pruebas ni flujos manuales.
-- Pendiente: extraer mensajes de autenticación a `src/utils/authMessages.js`
-  durante la creación del contexto de autenticación y validar los flujos
-  manualmente en el emulador.
+- Los mensajes de autenticación ya están centralizados en
+  `src/utils/authMessages.js`.
+- Pendiente: validar los flujos manualmente en el emulador.
+
+## Fase 2: servicios y estado reutilizable
+
+- Se agregaron servicios de Firestore para publicaciones, búsquedas,
+  moderación/vendedores, opiniones y denuncias, manteniendo las colecciones
+  y los identificadores actuales.
+- Se creó `AuthContext` con estado de sesión y acciones de autenticación.
+- Se agregaron `useCollection`, `useFavorites`, `useA11yPrefs`,
+  `shrinkImage` y la conversión limitada a data URL.
+- No se ejecutaron pruebas. Lint y compilación pasaron.
+- La interfaz todavía consume temporalmente el adaptador legacy.
