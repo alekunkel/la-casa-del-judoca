@@ -26,6 +26,7 @@ function readPreferences() {
 		});
 		return { preferences: safePreferences, error: null };
 	} catch (error) {
+		console.error("No se pudieron leer las preferencias de accesibilidad.", error);
 		return { preferences: defaults, error };
 	}
 }

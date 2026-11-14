@@ -1,7 +1,4 @@
 node_modules
 dist
 package-lock.json
-src/legacy.js
-src/firebase.js
-src/page.html
 src/styles.css

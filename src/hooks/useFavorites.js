@@ -8,6 +8,7 @@ function readFavorites() {
 		}
 		return { favorites: stored, error: null };
 	} catch (error) {
+		console.error("No se pudieron leer los favoritos.", error);
 		return { favorites: [], error };
 	}
 }
