@@ -9,22 +9,26 @@ import {
 } from "firebase/auth";
 import { ADMIN_EMAILS } from "../config.js";
 import { auth } from "../lib/firebase.js";
+import { getAuthErrorMessage } from "../utils/authMessages.js";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
 	const [user, setUser] = useState(null);
 	const [loading, setLoading] = useState(true);
+	const [errorMessage, setErrorMessage] = useState("");
 
 	useEffect(() => {
 		return onAuthStateChanged(
 			auth,
 			(nextUser) => {
 				setUser(nextUser);
+				setErrorMessage("");
 				setLoading(false);
 			},
 			(error) => {
 				console.error("No se pudo observar el estado de autenticación.", error);
+				setErrorMessage(getAuthErrorMessage(error));
 				setLoading(false);
 			},
 		);
@@ -41,16 +45,21 @@ export function AuthProvider({ children }) {
 			uid: user?.uid ?? null,
 			isAdmin,
 			loading,
+			errorMessage,
 			signIn: (email, password) => signInWithEmailAndPassword(auth, email, password),
 			signUp: async (email, password) => {
 				const result = await createUserWithEmailAndPassword(auth, email, password);
-				await sendEmailVerification(result.user);
-				return result;
+				try {
+					await sendEmailVerification(result.user);
+					return { user: result.user, verificationSent: true };
+				} catch (error) {
+					return { user: result.user, verificationSent: false, verificationError: error };
+				}
 			},
 			resetPassword: (email) => sendPasswordResetEmail(auth, email),
 			signOut: () => firebaseSignOut(auth),
 		};
-	}, [loading, user]);
+	}, [errorMessage, loading, user]);
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
