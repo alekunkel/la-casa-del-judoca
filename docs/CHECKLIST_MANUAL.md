@@ -4,6 +4,9 @@ Ejecutar estos flujos con una cuenta de prueba y el emulador de Firebase antes
 de publicar cambios. No usar datos de producción durante las pruebas.
 
 - [ ] Crear una cuenta y confirmar el correo.
+- [ ] Asignar el claim `admin` a una cuenta de prueba con
+      `scripts/set-admin-claims.mjs` y pedirle que cierre sesión y vuelva a
+      ingresar.
 - [ ] Iniciar y cerrar sesión.
 - [ ] Solicitar el restablecimiento de contraseña.
 - [ ] Publicar un producto sin fotos y otro con fotos.

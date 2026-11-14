@@ -94,15 +94,15 @@ autorizados de Firebase Authentication.
 
 PARTE 5 - CUENTA ADMINISTRADORA
 -------------------------------
-La lista de correos administradores está en `src/config.js`; la autorización
-requiere correo verificado. La persona responsable debe revisar y aprobar los
-correos antes de publicar. No edites reglas para agregar una cuenta sin revisar
-la configuración correspondiente.
+La autorización de administración no se basa en una lista en `src/config.js`.
+El acceso se define con el custom claim `admin` del usuario autenticado; la
+persona responsable debe asignarlo con `scripts/set-admin-claims.mjs` y luego
+pedirle a cada administrador que cierre sesión y vuelva a ingresar.
 
 Cuando la aplicación esté publicada y aprobada:
-1. La persona responsable crea su cuenta con un correo autorizado.
-2. Abre el mensaje de verificación y confirma la dirección.
-3. Cierra sesión y vuelve a ingresar.
+1. La persona responsable identifica la cuenta administradora.
+2. Ejecuta el script de claims en el entorno correcto para poner `admin: true`.
+3. La cuenta cierra sesión y vuelve a ingresar.
 4. Comprueba que aparezca el panel de administración.
 
 QUÉ CAMBIÓ

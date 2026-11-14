@@ -10,9 +10,11 @@
 		"lint": "eslint .",
 		"format": "prettier --write \"src/**/*.{js,jsx}\" \"README.md\" \"docs/**/*.md\" --use-tabs",
 		"test": "vitest run",
-		"test:rules": "firebase emulators:exec --only firestore --project casa-del-judoca-dev \"vitest run --config vitest.rules.config.js\"",
+		"test:rules": "firebase emulators:exec --config firebase.dev.json --only firestore --project casa-del-judoca-dev \"vitest run --config vitest.rules.config.js\"",
 		"test:e2e": "playwright test",
-		"emulators": "firebase emulators:start --only auth,firestore --project casa-del-judoca-dev"
+		"emulators": "firebase emulators:start --config firebase.dev.json --only auth,firestore --project casa-del-judoca-dev",
+		"test:all": "npm run lint && npm test && npm run test:rules && npm run test:e2e",
+		"verify": "npm run test:all && npm run build"
 	},
 	"dependencies": {
 		"firebase": "^10.12.2",

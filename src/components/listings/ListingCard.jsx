@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { CFG } from "../../config.js";
-import { deleteListing, updateListing } from "../../services/listings.js";
 import {
-	setModeration,
-	setSellerVerification,
-} from "../../services/moderation.js";
+	deleteListing,
+	setListingFeatured,
+	setListingStatus,
+	updateListing,
+} from "../../services/listings.js";
+import { setSellerVerification } from "../../services/sellers.js";
 import { createReport } from "../../services/reports.js";
 import { getRatingSummary } from "../reviews/RatingSummary.jsx";
 import ReviewPanel from "../reviews/ReviewPanel.jsx";
@@ -29,7 +31,6 @@ function TagList({ label, values }) {
 
 export default function ListingCard({
 	listing,
-	moderation,
 	verified,
 	reviews,
 	uid,
@@ -40,7 +41,6 @@ export default function ListingCard({
 }) {
 	const [reviewsOpen, setReviewsOpen] = useState(false);
 	const [paymentOpen, setPaymentOpen] = useState(false);
-	const state = moderation[listing.id] || {};
 	const canManage = isAdmin || (!!uid && listing.owner === uid);
 	const photos = listing.photos?.length
 		? listing.photos
@@ -51,6 +51,8 @@ export default function ListingCard({
 	const rating = getRatingSummary(reviews, listing.owner);
 	const paymentEnabled = !!(CFG.precio && (CFG.alias || CFG.link) && CFG.wa);
 	const reviewPanelId = `reviews-${listing.id}`;
+	const featured = Boolean(listing.featured);
+	const approved = listing.status === "approved";
 
 	const runAction = async (action, successMessage, errorMessage) => {
 		try {
@@ -115,17 +117,15 @@ export default function ListingCard({
 
 	const handleFeatured = () =>
 		runAction(
-			() => setModeration(listing.id, { featured: !state.featured }),
-			state.featured ? "Se quitó el destacado." : "Publicación destacada.",
+			() => setListingFeatured(listing.id, !featured),
+			featured ? "Se quitó el destacado." : "Publicación destacada.",
 			"No se pudo actualizar el destacado.",
 		);
 
 	const handleApproval = () =>
 		runAction(
-			() => setModeration(listing.id, { approved: state.approved !== true }),
-			state.approved === true
-				? "Publicación ocultada."
-				: "Publicación aprobada.",
+			() => setListingStatus(listing.id, approved ? "pending" : "approved"),
+			approved ? "Publicación ocultada." : "Publicación aprobada.",
 			"No se pudo actualizar la aprobación.",
 		);
 
@@ -140,9 +140,7 @@ export default function ListingCard({
 		);
 
 	return (
-		<article
-			className={`card${listing.sold ? " sold" : ""}${state.featured ? " feat" : ""}`}
-		>
+		<article className={`card${listing.sold ? " sold" : ""}${featured ? " feat" : ""}`}>
 			<div
 				className={`ph${photos.length > 1 ? " g" : ""}`}
 				{...(photos.length > 1
@@ -154,10 +152,8 @@ export default function ListingCard({
 					: {})}
 			>
 				{listing.sold && <span className="badge">Vendido</span>}
-				{state.featured && <span className="badge f">Destacado</span>}
-				{state.approved !== true && (
-					<span className="badge f">En revisión</span>
-				)}
+				{featured && <span className="badge f">Destacado</span>}
+				{!approved && <span className="badge f">En revisión</span>}
 				{photos.length ? (
 					photos.map((photo, index) => (
 						<img
@@ -176,13 +172,9 @@ export default function ListingCard({
 				)}
 			</div>
 			<div className="b">
-				<div className="pr">
-					${Number(listing.price).toLocaleString("es-AR")}
-				</div>
+				<div className="pr">${Number(listing.price).toLocaleString("es-AR")}</div>
 				<div>{listing.title}</div>
-				<div className="m">
-					Talle {listing.size} · {listing.cond}
-				</div>
+				<div className="m">Talle {listing.size} · {listing.cond}</div>
 				<div className="m">
 					Vendedor: {listing.seller || "sin nombre"}
 					{rating}
@@ -264,9 +256,7 @@ export default function ListingCard({
 									)
 								}
 							>
-								{listing.sold
-									? "Marcar como disponible"
-									: "Marcar como vendido"}
+								{listing.sold ? "Marcar como disponible" : "Marcar como vendido"}
 							</button>
 							<button
 								className="x"
@@ -276,47 +266,40 @@ export default function ListingCard({
 							>
 								Eliminar publicación
 							</button>
-							{paymentEnabled &&
-								uid === listing.owner &&
-								!state.featured &&
-								!listing.sold && (
-									<button
-										className="x"
-										type="button"
-										aria-expanded={paymentOpen}
-										aria-controls={`payment-${listing.id}`}
-										aria-label={`Destacar publicación: ${listing.title}`}
-										onClick={() => setPaymentOpen((current) => !current)}
-									>
-										Destacar mi publicación
-									</button>
-								)}
+							{paymentEnabled && uid === listing.owner && !featured && !listing.sold && (
+								<button
+									className="x"
+									type="button"
+									aria-expanded={paymentOpen}
+									aria-controls={`payment-${listing.id}`}
+									aria-label={`Destacar publicación: ${listing.title}`}
+									onClick={() => setPaymentOpen((current) => !current)}
+								>
+									Destacar mi publicación
+								</button>
+							)}
 							{isAdmin && (
 								<>
 									<button
 										className="x"
 										type="button"
-										aria-label={`${state.approved ? "Ocultar publicación" : "Aprobar publicación"}: ${listing.title}`}
+										aria-label={`${approved ? "Ocultar publicación" : "Aprobar publicación"}: ${listing.title}`}
 										onClick={handleApproval}
 									>
-										{state.approved
-											? "Ocultar publicación"
-											: "Aprobar publicación"}
+										{approved ? "Ocultar publicación" : "Aprobar publicación"}
 									</button>
 									{listing.owner && (
 										<button
 											className="x"
 											type="button"
-											aria-label={`${verified ? "Quitar verificado a " : "Verificar a "}${
-												listing.seller || "vendedor"
-											}`}
+											aria-label={`${verified ? "Quitar verificado a " : "Verificar a "}${listing.seller || "vendedor"}`}
 											onClick={handleVerification}
 										>
 											{verified ? "Quitar verificado" : "Verificar vendedor"}
 										</button>
 									)}
 									<button className="x" type="button" onClick={handleFeatured}>
-										{state.featured ? "Quitar destacado" : "Activar destacado"}
+										{featured ? "Quitar destacado" : "Activar destacado"}
 										<span className="sr-only">: {listing.title}</span>
 									</button>
 								</>

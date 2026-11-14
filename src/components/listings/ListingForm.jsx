@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { createListing } from "../../services/listings.js";
-import { setModeration } from "../../services/moderation.js";
 import { fileToDataUrl } from "../../utils/photos.js";
 import { shrinkImage } from "../../utils/shrinkImage.js";
 import PhotoUploader from "./PhotoUploader.jsx";
@@ -93,8 +92,9 @@ export default function ListingForm({
 				photos,
 				owner: uid,
 				ts: Date.now(),
+				status: isAdmin ? "approved" : "pending",
+				featured: false,
 			});
-			if (isAdmin) await setModeration(id, { approved: true });
 			form.reset();
 			setFiles([]);
 			setAlt("");

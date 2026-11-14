@@ -7,7 +7,6 @@ import {
 	signInWithEmailAndPassword,
 	signOut as firebaseSignOut,
 } from "firebase/auth";
-import { ADMIN_EMAILS } from "../config.js";
 import { auth } from "../lib/firebase.js";
 import { getAuthErrorMessage } from "../utils/authMessages.js";
 
@@ -16,15 +15,29 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
 	const [user, setUser] = useState(null);
 	const [loading, setLoading] = useState(true);
+	const [isAdmin, setIsAdmin] = useState(false);
 	const [errorMessage, setErrorMessage] = useState("");
 
 	useEffect(() => {
 		return onAuthStateChanged(
 			auth,
-			(nextUser) => {
+			async (nextUser) => {
 				setUser(nextUser);
 				setErrorMessage("");
-				setLoading(false);
+				if (!nextUser) {
+					setIsAdmin(false);
+					setLoading(false);
+					return;
+				}
+				try {
+					const tokenResult = await nextUser.getIdTokenResult();
+					setIsAdmin(tokenResult.claims.admin === true);
+				} catch (error) {
+					console.error("No se pudo resolver el token de autenticación.", error);
+					setIsAdmin(false);
+				} finally {
+					setLoading(false);
+				}
 			},
 			(error) => {
 				console.error("No se pudo observar el estado de autenticación.", error);
@@ -35,11 +48,6 @@ export function AuthProvider({ children }) {
 	}, []);
 
 	const value = useMemo(() => {
-		const isAdmin = !!(
-			user?.email &&
-			ADMIN_EMAILS.includes(user.email.toLowerCase()) &&
-			user.emailVerified
-		);
 		return {
 			user,
 			uid: user?.uid ?? null,
@@ -68,7 +76,7 @@ export function AuthProvider({ children }) {
 			resetPassword: (email) => sendPasswordResetEmail(auth, email),
 			signOut: () => firebaseSignOut(auth),
 		};
-	}, [errorMessage, loading, user]);
+	}, [errorMessage, isAdmin, loading, user]);
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

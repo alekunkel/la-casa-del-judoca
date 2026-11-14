@@ -34,32 +34,51 @@ async function ensureAdminAccount() {
 }
 
 async function signUp(page, email) {
-	await page.getByRole("button", { name: "Ingresar" }).click();
-	await page.getByLabel("Correo electrónico").fill(email);
+	await page.locator('button[aria-controls="auth"]').click();
+	await page.locator("#auth").getByLabel("Correo electrónico").fill(email);
 	await page
+		.locator("#auth")
 		.getByLabel("Contraseña (mínimo 6 caracteres)")
 		.fill("judoka-test-password");
-	await page.getByRole("button", { name: "Crear cuenta" }).click();
+	await page.locator("#auth").getByRole("button", { name: "Crear cuenta" }).click();
 	await expect(page.locator("#ok")).toContainText("Cuenta creada.");
 }
 
+async function signOut(page) {
+	const panel = page.locator("#auth");
+	if (!(await panel.isVisible().catch(() => false))) {
+		await page.locator('button[aria-controls="auth"]').click();
+	}
+	if (await panel.getByRole("button", { name: "Salir" }).isVisible().catch(() => false)) {
+		await panel.getByRole("button", { name: "Salir" }).click();
+		await expect(page.locator('button[aria-controls="auth"]')).toBeVisible();
+	}
+}
+
 async function signIn(page, email, password) {
-	await page.getByRole("button", { name: "Ingresar" }).click();
-	await page.getByLabel("Correo electrónico").fill(email);
-	await page.getByLabel("Contraseña (mínimo 6 caracteres)").fill(password);
-	await page.getByRole("button", { name: "Ingresar", exact: true }).click();
+	await signOut(page);
+	const auth = page.locator("#auth");
+	if (!(await auth.isVisible().catch(() => false))) {
+		await page.locator('button[aria-controls="auth"]').click();
+	}
+	await auth.getByLabel("Correo electrónico").fill(email);
+	await auth.getByLabel("Contraseña (mínimo 6 caracteres)").fill(password);
+	await auth.getByRole("button", { name: "Ingresar", exact: true }).click();
 	await expect(page.locator("#ok")).toHaveText("Ingresaste correctamente.");
 }
 
 async function publishListing(page, title) {
 	await page.getByRole("button", { name: "Publicar mi producto" }).click();
-	await page.getByLabel("Tu nombre").fill("Vendedor de prueba");
-	await page.getByLabel("Título").fill(title);
-	await page.getByLabel("Categoría").selectOption("Judogis");
-	await page.getByLabel("Talle").fill("A3");
-	await page.getByLabel("Estado").selectOption("Muy buen estado");
-	await page.getByLabel("Precio ($)").fill("15000");
-	await page.getByLabel("WhatsApp (con código de país)").fill("5491122334455");
+	await page.locator("#listing-form").getByLabel("Tu nombre").fill("Vendedor de prueba");
+	await page.locator("#listing-form").getByLabel("Título").fill(title);
+	await page.locator("#listing-form").getByLabel("Categoría").selectOption("Judogis");
+	await page.locator("#listing-form").getByLabel("Talle").fill("A3");
+	await page.locator("#listing-form").getByLabel("Estado").selectOption("Muy buen estado");
+	await page.locator("#listing-form").getByLabel("Precio ($)").fill("15000");
+	await page
+		.locator("#listing-form")
+		.getByLabel("WhatsApp (con código de país)")
+		.fill("5491122334455");
 	await page
 		.locator("#listing-form")
 		.getByRole("button", { name: "Publicar" })
@@ -74,7 +93,10 @@ test("registrarse y recibir el aviso de verificación", async ({ page }) => {
 
 test("publicar un producto y verlo en revisión", async ({ page }) => {
 	await page.goto("/");
-	await signUp(page, `vendedor-${Date.now()}@example.com`);
+	const sellerEmail = `vendedor-${Date.now()}@example.com`;
+	await signUp(page, sellerEmail);
+	await signOut(page);
+	await signIn(page, sellerEmail, "judoka-test-password");
 	const title = `Judogi pendiente ${Date.now()}`;
 	await publishListing(page, title);
 	await expect(page.locator("#ok")).toContainText(
@@ -90,20 +112,23 @@ test("administración aprueba una publicación y queda visible en público", asy
 	await page.goto("/");
 	const sellerEmail = `aprobacion-${Date.now()}@example.com`;
 	await signUp(page, sellerEmail);
+	await signOut(page);
+	await signIn(page, sellerEmail, "judoka-test-password");
 	const title = `Judogi para aprobar ${Date.now()}`;
 	await publishListing(page, title);
 	await expect(page.locator("#ok")).toContainText(
 		"aparece cuando la revisemos",
 	);
 
-	await page.getByRole("button", { name: "Mi cuenta" }).click();
-	await page.getByRole("button", { name: "Salir" }).click();
-	await expect(page.getByRole("button", { name: "Ingresar" })).toBeVisible();
+	await signOut(page);
 
 	const admin = await ensureAdminAccount();
 	await signIn(page, admin.email, admin.password);
 	await page
-		.getByRole("button", { name: `Aprobar publicación: ${title}` })
+		.getByRole("region", { name: "Panel del administrador" })
+		.getByRole("button", {
+			name: new RegExp(`^Aprobar publicación: ${title}$`),
+		})
 		.click();
 
 	const publicPage = await browser.newPage();
@@ -119,18 +144,26 @@ test("una persona compradora puede dejar una opinión", async ({ page }) => {
 	const title = `Judogi con opinión ${Date.now()}`;
 	await publishListing(page, title);
 	await expect(page.locator("#ok")).toHaveText("Publicación creada.");
-	await page.getByRole("button", { name: "Mi cuenta" }).click();
-	await page.getByRole("button", { name: "Salir" }).click();
+	await signOut(page);
 
-	await signUp(page, `comprador-${Date.now()}@example.com`);
+	const buyerEmail = `comprador-${Date.now()}@example.com`;
+	await signUp(page, buyerEmail);
+	await signOut(page);
+	await signIn(page, buyerEmail, "judoka-test-password");
 	await page
 		.getByRole("button", { name: `Ver u opinar sobre el vendedor de ${title}` })
 		.click();
 	await page
-		.getByLabel("Tu nombre", { exact: true })
-		.last()
+		.getByRole("region", { name: "Opiniones sobre el vendedor" })
+		.getByLabel("Tu nombre")
 		.fill("Comprador de prueba");
-	await page.getByLabel("Comentario (opcional)").fill("Opinión del emulador");
-	await page.getByRole("button", { name: "Enviar opinión" }).click();
-	await expect(page.getByText("Gracias por tu opinión.")).toBeVisible();
+	await page
+		.getByRole("region", { name: "Opiniones sobre el vendedor" })
+		.getByLabel("Comentario (opcional)")
+		.fill("Opinión del emulador");
+	await page
+		.getByRole("region", { name: "Opiniones sobre el vendedor" })
+		.getByRole("button", { name: "Enviar opinión" })
+		.click();
+	await expect(page.locator("#ok")).toContainText("Gracias por tu opinión.");
 });

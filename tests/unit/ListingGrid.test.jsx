@@ -5,9 +5,10 @@ import ListingGrid from "../../src/components/listings/ListingGrid.jsx";
 vi.mock("../../src/services/listings.js", () => ({
 	deleteListing: vi.fn(),
 	updateListing: vi.fn(),
+	setListingFeatured: vi.fn(),
+	setListingStatus: vi.fn(),
 }));
 vi.mock("../../src/services/moderation.js", () => ({
-	setModeration: vi.fn(),
 	setSellerVerification: vi.fn(),
 }));
 vi.mock("../../src/services/reports.js", () => ({
@@ -29,6 +30,8 @@ const listings = [
 		owner: "seller-1",
 		wa: "5491122334455",
 		photos: [],
+		status: "approved",
+		featured: false,
 	},
 	{
 		id: "affordable",
@@ -40,6 +43,8 @@ const listings = [
 		owner: "seller-2",
 		wa: "5491122334455",
 		photos: [],
+		status: "approved",
+		featured: false,
 	},
 ];
 
@@ -49,10 +54,6 @@ function renderGrid() {
 			listings={listings}
 			listingsLoading={false}
 			listingsError={null}
-			moderation={{
-				expensive: { approved: true },
-				affordable: { approved: true },
-			}}
 			sellers={{}}
 			reviews={[]}
 			uid={null}

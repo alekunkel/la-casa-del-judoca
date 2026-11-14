@@ -16,31 +16,27 @@ import WantedSection from "./components/wanted/WantedSection.jsx";
 import { AuthProvider, useAuth } from "./context/AuthContext.jsx";
 import { useCollection } from "./hooks/useCollection.js";
 import { useFavorites } from "./hooks/useFavorites.js";
-import { subscribeListings } from "./services/listings.js";
-import {
-	subscribeModeration,
-	subscribeSellers,
-} from "./services/moderation.js";
+import { subscribeVisibleListings } from "./services/listings.js";
+import { subscribeSellers } from "./services/sellers.js";
 import { subscribeReports } from "./services/reports.js";
 import { subscribeReviews } from "./services/reviews.js";
-import { subscribeWanted } from "./services/wanted.js";
+import { subscribeVisibleWanted } from "./services/wanted.js";
 import "./styles.css";
 
 const AdminPanel = lazy(() => import("./components/admin/AdminPanel.jsx"));
 
 function AppContent() {
-	const { user, uid, isAdmin, errorMessage: authError } = useAuth();
+	const { user, uid, isAdmin, loading, errorMessage: authError } = useAuth();
 	const [accountOpen, setAccountOpen] = useState(false);
 	const [a11yOpen, setA11yOpen] = useState(false);
 	const [announcement, setAnnouncement] = useState("");
 	const { favorites, toggleFavorite } = useFavorites();
 	const listingsSubscription = useCallback(
-		(onData, onError) => subscribeListings(onData, onError),
-		[],
-	);
-	const moderationSubscription = useCallback(
-		(onData, onError) => subscribeModeration(onData, onError),
-		[],
+		(onData, onError) => {
+			if (loading) return () => {};
+			return subscribeVisibleListings({ uid, isAdmin }, onData, onError);
+		},
+		[isAdmin, loading, uid],
 	);
 	const sellersSubscription = useCallback(
 		(onData, onError) => subscribeSellers(onData, onError),
@@ -51,8 +47,11 @@ function AppContent() {
 		[],
 	);
 	const wantedSubscription = useCallback(
-		(onData, onError) => subscribeWanted(onData, onError),
-		[],
+		(onData, onError) => {
+			if (loading) return () => {};
+			return subscribeVisibleWanted({ uid, isAdmin }, onData, onError);
+		},
+		[isAdmin, loading, uid],
 	);
 	const reportsSubscription = useCallback(
 		(onData, onError) =>
@@ -60,23 +59,20 @@ function AppContent() {
 		[isAdmin],
 	);
 	const listingsState = useCollection(listingsSubscription);
-	const moderationState = useCollection(moderationSubscription);
 	const sellersState = useCollection(sellersSubscription);
 	const reviewsState = useCollection(reviewsSubscription);
 	const wantedState = useCollection(wantedSubscription);
 	const reportsState = useCollection(reportsSubscription);
-	const moderation = moderationState.data;
 	const sellers = sellersState.data;
 	const reports = isAdmin ? reportsState.data : [];
 	const dataError =
 		listingsState.error ||
-		moderationState.error ||
 		sellersState.error ||
 		reviewsState.error ||
 		wantedState.error ||
 		(isAdmin && reportsState.error);
 	const availableCount = listingsState.data.filter(
-		(listing) => !listing.sold && moderation[listing.id]?.approved === true,
+		(listing) => !listing.sold && listing.status === "approved",
 	).length;
 	const countText = listingsState.data.length
 		? `${availableCount} ${availableCount === 1 ? "producto disponible" : "productos disponibles"}`
@@ -111,7 +107,11 @@ function AppContent() {
 				onToggleAccount={toggleAccount}
 				onToggleA11y={toggleA11y}
 			>
-				<AuthPanel open={accountOpen} onAnnouncement={announcementHandler} />
+				<AuthPanel
+					open={accountOpen}
+					onAnnouncement={announcementHandler}
+					onClose={() => setAccountOpen(false)}
+				/>
 				<A11yPanel open={a11yOpen} />
 			</Header>
 			<main id="main" tabIndex="-1">
@@ -126,7 +126,6 @@ function AppContent() {
 							wanted={wantedState.data}
 							reports={reports}
 							reviews={reviewsState.data}
-							moderation={moderation}
 							onAnnouncement={announcementHandler}
 						/>
 					</Suspense>
@@ -135,7 +134,6 @@ function AppContent() {
 					listings={listingsState.data}
 					listingsLoading={listingsState.loading}
 					listingsError={listingsState.error}
-					moderation={moderation}
 					sellers={sellers}
 					reviews={reviewsState.data}
 					uid={uid}
@@ -147,7 +145,6 @@ function AppContent() {
 				/>
 				<WantedSection
 					items={wantedState.data}
-					moderation={moderation}
 					loading={wantedState.loading}
 					error={wantedState.error}
 					uid={uid}

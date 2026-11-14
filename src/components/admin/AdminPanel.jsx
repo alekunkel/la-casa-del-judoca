@@ -1,7 +1,6 @@
-import { deleteListing } from "../../services/listings.js";
+import { deleteListing, setListingStatus } from "../../services/listings.js";
 import { deleteReport } from "../../services/reports.js";
-import { setModeration } from "../../services/moderation.js";
-import { deleteWanted } from "../../services/wanted.js";
+import { deleteWanted, setWantedStatus } from "../../services/wanted.js";
 
 export default function AdminPanel({
 	isAdmin,
@@ -9,19 +8,12 @@ export default function AdminPanel({
 	wanted,
 	reports,
 	reviews,
-	moderation,
 	onAnnouncement,
 }) {
 	if (!isAdmin) return null;
-	const pendingListings = listings.filter(
-		(listing) => moderation[listing.id]?.approved !== true,
-	);
-	const pendingWanted = wanted.filter(
-		(item) => moderation[item.id]?.approved !== true,
-	);
-	const featuredCount = listings.filter(
-		(listing) => moderation[listing.id]?.featured,
-	).length;
+	const pendingListings = listings.filter((listing) => listing.status !== "approved");
+	const pendingWanted = wanted.filter((item) => item.status !== "approved");
+	const featuredCount = listings.filter((listing) => listing.featured).length;
 	const summary = [
 		`${pendingListings.length} publicaciones por aprobar`,
 		`${pendingWanted.length} búsquedas por aprobar`,
@@ -52,8 +44,7 @@ export default function AdminPanel({
 				{pendingListings.map((listing) => (
 					<div key={listing.id} className="pay">
 						<p>
-							Publicación: {listing.title || ""} —{" "}
-							{listing.seller || "sin nombre"}
+							Publicación: {listing.title || ""} — {listing.seller || "sin nombre"}
 						</p>
 						<div className="acts">
 							<button
@@ -62,7 +53,7 @@ export default function AdminPanel({
 								aria-label={`Aprobar publicación: ${listing.title}`}
 								onClick={() =>
 									runAction(
-										() => setModeration(listing.id, { approved: true }),
+										() => setListingStatus(listing.id, "approved"),
 										"Publicación aprobada.",
 										"No se pudo aprobar.",
 									)
@@ -101,7 +92,7 @@ export default function AdminPanel({
 								aria-label={`Aprobar búsqueda: ${item.text}`}
 								onClick={() =>
 									runAction(
-										() => setModeration(item.id, { approved: true }),
+										() => setWantedStatus(item.id, "approved"),
 										"Búsqueda aprobada.",
 										"No se pudo aprobar.",
 									)
@@ -138,7 +129,7 @@ export default function AdminPanel({
 								aria-label={`Ocultar publicación denunciada: ${report.title || ""}`}
 								onClick={() =>
 									runAction(
-										() => setModeration(report.listing, { approved: false }),
+										() => setListingStatus(report.listing, "pending"),
 										"Publicación ocultada.",
 										"No se pudo ocultar la publicación.",
 									)

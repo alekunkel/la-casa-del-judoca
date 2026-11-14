@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { getAuthErrorMessage } from "../../utils/authMessages.js";
 
-export default function AuthPanel({ open, onAnnouncement }) {
+export default function AuthPanel({ open, onAnnouncement, onClose }) {
 	const { user, loading, signIn, signUp, resetPassword, signOut } = useAuth();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
@@ -72,6 +72,7 @@ export default function AuthPanel({ open, onAnnouncement }) {
 			await signOut();
 			onAnnouncement("Saliste de tu cuenta.");
 			setMessage("");
+			onClose?.();
 		});
 
 	return (

@@ -13,17 +13,26 @@ y almacenamiento de datos.
 
 ```sh
 npm install
+npm run emulators
 npm run dev
 ```
 
 En desarrollo, la app se conecta automáticamente a los emuladores Auth y
-Firestore en `127.0.0.1`, con el proyecto local `casa-del-judoca-dev`. Iniciá
-`npm run emulators` en una terminal y `npm run dev` en otra. No hace falta
-configurar credenciales reales para desarrollar.
+Firestore en `127.0.0.1`, con el proyecto local `casa-del-judoca-dev`. No hace
+falta configurar credenciales reales para desarrollar; la carpeta local usa
+`firebase.dev.json` y las reglas de emulación.
 
 Para generar la versión de producción, configurá las seis variables
 `VITE_FIREBASE_*` de `.env.example` en el entorno de compilación y ejecutá
 `npm run build`. El resultado queda en `dist/`.
+
+## Administradores
+
+La autorización de administración ya no depende de una lista de correos en
+`src/config.js`. Los permisos se resuelven desde el custom claim `admin` del
+usuario autenticado. Para asignarlos en un entorno real, se usa
+`scripts/set-admin-claims.mjs` y luego cada cuenta debe cerrar sesión y volver a
+ingresar.
 
 ## Validaciones
 
@@ -31,18 +40,13 @@ Para generar la versión de producción, configurá las seis variables
 npm run lint
 npm test
 npm run build
-```
-
-Las pruebas de reglas y de navegador usan únicamente los emuladores locales:
-
-```sh
 npm run test:rules
 npm run test:e2e
 ```
 
 `npm run emulators` inicia Auth y Firestore locales, que son los emuladores que
-usa la aplicación. No ejecutes scripts de datos con `--apply` sin revisar el
-proyecto y recibir aprobación.
+usa la aplicación. No ejecutes scripts de datos con `--apply` ni despliegues sin
+revisar el proyecto y recibir aprobación.
 
 ## Estructura
 

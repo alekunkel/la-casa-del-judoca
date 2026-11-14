@@ -5,9 +5,10 @@ import ListingCard from "../../src/components/listings/ListingCard.jsx";
 vi.mock("../../src/services/listings.js", () => ({
 	deleteListing: vi.fn(),
 	updateListing: vi.fn(),
+	setListingFeatured: vi.fn(),
+	setListingStatus: vi.fn(),
 }));
 vi.mock("../../src/services/moderation.js", () => ({
-	setModeration: vi.fn(),
 	setSellerVerification: vi.fn(),
 }));
 vi.mock("../../src/services/reports.js", () => ({
@@ -34,8 +35,9 @@ describe("ListingCard", () => {
 					alt: "Judogi doblado sobre una mesa",
 					photos: ["data:image/jpeg;base64,photo"],
 					sold: false,
+					status: "approved",
+					featured: false,
 				}}
-				moderation={{ "listing-1": { approved: true } }}
 				verified={false}
 				reviews={[]}
 				uid={null}

@@ -78,6 +78,7 @@ it("valida la creación de publicaciones y búsquedas", async () => {
 			wa: "5491122334455",
 			owner: "seller",
 			ts: 1,
+			status: "pending",
 		}),
 	);
 	await assertFails(
@@ -88,6 +89,7 @@ it("valida la creación de publicaciones y búsquedas", async () => {
 			wa: "5491122334455",
 			owner: "seller",
 			ts: 1,
+			status: "pending",
 		}),
 	);
 });

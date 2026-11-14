@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { createWanted, deleteWanted } from "../../services/wanted.js";
-import { setModeration } from "../../services/moderation.js";
+import { createWanted, deleteWanted, setWantedStatus } from "../../services/wanted.js";
 
 function makeWantedId() {
 	return `w${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
@@ -42,8 +41,8 @@ function WantedForm({ uid, isAdmin, onLoginRequest, onAnnouncement }) {
 				wa: whatsapp.trim(),
 				owner: uid,
 				ts: Date.now(),
+				status: isAdmin ? "approved" : "pending",
 			});
-			if (isAdmin) await setModeration(id, { approved: true });
 			form.reset();
 			setOpen(false);
 			setStatus("");
@@ -123,7 +122,6 @@ function WantedForm({ uid, isAdmin, onLoginRequest, onAnnouncement }) {
 
 export default function WantedSection({
 	items,
-	moderation,
 	loading,
 	error,
 	uid,
@@ -133,10 +131,7 @@ export default function WantedSection({
 }) {
 	const [message, setMessage] = useState("");
 	const visibleItems = items.filter(
-		(item) =>
-			moderation[item.id]?.approved === true ||
-			isAdmin ||
-			(!!uid && item.owner === uid),
+		(item) => item.status === "approved" || isAdmin || (!!uid && item.owner === uid),
 	);
 
 	const handleDelete = async (item) => {
@@ -148,6 +143,14 @@ export default function WantedSection({
 			console.error("No se pudo eliminar la búsqueda.", deleteError);
 			setMessage("No se pudo eliminar.");
 		}
+	};
+
+	const handleApproval = async (item) => {
+		if (!isAdmin) return;
+		await setWantedStatus(item.id, item.status === "approved" ? "pending" : "approved");
+		onAnnouncement(
+			item.status === "approved" ? "Búsqueda ocultada." : "Búsqueda aprobada.",
+		);
 	};
 
 	return (
@@ -184,9 +187,7 @@ export default function WantedSection({
 								{item.name}
 								{item.city ? ` · ${item.city}` : ""}
 							</div>
-							{moderation[item.id]?.approved !== true && (
-								<div className="m">En revisión</div>
-							)}
+							{item.status !== "approved" && <div className="m">En revisión</div>}
 							<a
 								className="btn"
 								target="_blank"
@@ -200,6 +201,15 @@ export default function WantedSection({
 							</a>
 							{(isAdmin || (!!uid && item.owner === uid)) && (
 								<div className="acts">
+									{isAdmin && (
+										<button
+											className="x"
+											type="button"
+											onClick={() => handleApproval(item)}
+										>
+											{item.status === "approved" ? "Ocultar búsqueda" : "Aprobar búsqueda"}
+										</button>
+									)}
 									<button
 										className="x"
 										type="button"

@@ -23,8 +23,9 @@ personas usuarias.
 - `firestore.rules` es la versión actualmente usada por la guía de despliegue.
 - `firestore.rules.v2` es solo una propuesta para revisar y probar en el
   emulador. No publicarla desde este repositorio sin aprobación humana.
-- La propuesta usa el custom claim `admin`; `scripts/set-admin-claims.mjs`
-  requiere credenciales locales y bloquea explícitamente el id de producción.
+- La administración se define con el custom claim `admin`; no hay una lista fija
+  de correos en el código cliente. `scripts/set-admin-claims.mjs` requiere
+  credenciales locales y bloquea explícitamente el id de producción.
 - Los scripts de datos requieren proyecto explícito y no deben ejecutarse con
   credenciales ni datos de producción.
 

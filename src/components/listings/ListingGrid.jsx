@@ -7,7 +7,6 @@ export default function ListingGrid({
 	listings,
 	listingsLoading,
 	listingsError,
-	moderation,
 	sellers,
 	reviews,
 	uid,
@@ -25,7 +24,7 @@ export default function ListingGrid({
 	const visibleListings = useMemo(() => {
 		const normalizedQuery = query.trim().toLowerCase();
 		let result = listings.filter((listing) => {
-			const approved = moderation[listing.id]?.approved === true;
+			const approved = listing.status === "approved";
 			const visible = approved || isAdmin || (!!uid && listing.owner === uid);
 			const categoryMatches =
 				!category ||
@@ -45,24 +44,11 @@ export default function ListingGrid({
 				sort === "lo" ? left.price - right.price : right.price - left.price,
 			);
 		}
-		return [
-			...result.filter((listing) => moderation[listing.id]?.featured),
-			...result.filter((listing) => !moderation[listing.id]?.featured),
-		];
-	}, [
-		category,
-		condition,
-		favorites,
-		isAdmin,
-		listings,
-		moderation,
-		query,
-		sort,
-		uid,
-	]);
+		return [...result.filter((listing) => listing.featured), ...result.filter((listing) => !listing.featured)];
+	}, [category, condition, favorites, isAdmin, listings, query, sort, uid]);
 
 	const availableCount = listings.filter(
-		(listing) => !listing.sold && moderation[listing.id]?.approved === true,
+		(listing) => !listing.sold && listing.status === "approved",
 	).length;
 
 	return (
@@ -92,7 +78,6 @@ export default function ListingGrid({
 					<ListingCard
 						key={listing.id}
 						listing={listing}
-						moderation={moderation}
 						verified={sellers[listing.owner]?.verified === true}
 						reviews={reviews}
 						uid={uid}

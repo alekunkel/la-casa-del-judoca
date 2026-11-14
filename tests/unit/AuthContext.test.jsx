@@ -21,27 +21,33 @@ describe("AuthContext", () => {
 				uid: "admin",
 				email: "davidjudo.23@gmail.com",
 				emailVerified: false,
+				getIdTokenResult: vi.fn().mockResolvedValue({ claims: { admin: true } }),
 			});
 			return vi.fn();
 		});
 	});
 
-	it("solo considera administrador a una cuenta autorizada con correo verificado", async () => {
+	it("solo considera administrador a una cuenta con claim admin", async () => {
+		const wrapper = ({ children }) => <AuthProvider>{children}</AuthProvider>;
+		const { result } = renderHook(() => useAuth(), { wrapper });
+		await waitFor(() => expect(result.current.loading).toBe(false));
+		expect(result.current.isAdmin).toBe(true);
+	});
+
+	it("rechaza usuarios con correo administrador pero sin claim", async () => {
+		authMocks.onAuthStateChanged.mockImplementation((_auth, onUser) => {
+			onUser({
+				uid: "admin-like",
+				email: "davidjudo.23@gmail.com",
+				emailVerified: true,
+				getIdTokenResult: vi.fn().mockResolvedValue({ claims: {} }),
+			});
+			return vi.fn();
+		});
 		const wrapper = ({ children }) => <AuthProvider>{children}</AuthProvider>;
 		const { result } = renderHook(() => useAuth(), { wrapper });
 		await waitFor(() => expect(result.current.loading).toBe(false));
 		expect(result.current.isAdmin).toBe(false);
-
-		authMocks.onAuthStateChanged.mockImplementation((_auth, onUser) => {
-			onUser({
-				uid: "admin",
-				email: "davidjudo.23@gmail.com",
-				emailVerified: true,
-			});
-			return vi.fn();
-		});
-		const verified = renderHook(() => useAuth(), { wrapper });
-		await waitFor(() => expect(verified.result.current.isAdmin).toBe(true));
 	});
 
 	it("expone la acción de inicio de sesión", async () => {
