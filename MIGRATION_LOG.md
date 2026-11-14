@@ -69,17 +69,24 @@
 - El lint de JSX incluye las reglas recomendadas de `eslint-plugin-jsx-a11y`.
 - La validación manual con tecnologías de asistencia no se realizó.
 
-## Fases 6 y 7: pendientes de preparación
+## Fase 6: seguridad y datos
 
-- Se deben crear y revisar reglas v2, configuración de emuladores, scripts,
-  pruebas de reglas, pruebas de componentes y CI.
-- No se ejecutó ni se ejecutará ninguna operación contra Firebase de
-  producción. El usuario pidió no hacer pruebas; por eso cualquier prueba
-  escrita para estas fases quedará sin ejecutar y sin verificar en emulador.
+- Se prepararon `.firebaserc` con alias de desarrollo placeholder,
+  `firebase.json`, reglas v2 candidatas y reglas de Storage de desarrollo.
+- Se escribieron tests de reglas y scripts de migración/claims con dry-run,
+  proyecto explícito y bloqueo del id de producción.
+- Se documentó el plan de fotos y la revisión de seguridad/privacidad.
+- No se ejecutaron los tests de reglas ni scripts, ni se escribió en Firebase.
+  La configuración y las reglas no se verificaron en emulador por pedido de no
+  hacer pruebas; requieren revisión antes de cualquier uso.
+
+## Fase 7: pruebas y CI
+
+- Pendientes: agregar pruebas de componentes/contexto, flujos Playwright y el
+  workflow de CI. No se ejecutó ningún test.
 
 ## Fase 8: cierre
 
-- Pendientes: terminar la preparación de seguridad y CI, actualizar la guía de
-  despliegue, revisar el bundle y abrir el PR.
+- Pendientes: actualizar la guía de despliegue, revisar el bundle y abrir el PR.
 - No se hizo despliegue, no se aplicaron reglas y no se escribieron datos en
   Firebase.
