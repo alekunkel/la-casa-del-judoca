@@ -6,15 +6,36 @@
 	"scripts": {
 		"dev": "vite",
 		"build": "vite build",
-		"preview": "vite preview"
+		"preview": "vite preview",
+		"lint": "eslint .",
+		"format": "prettier --write \"src/**/*.{js,jsx}\" \"README.md\" \"docs/**/*.md\" --use-tabs",
+		"test": "vitest run",
+		"test:rules": "firebase emulators:exec --config firebase.dev.json --only firestore --project casa-del-judoca-dev \"vitest run --config vitest.rules.config.js\"",
+		"test:e2e": "playwright test",
+		"emulators": "firebase emulators:start --config firebase.dev.json --only auth,firestore --project casa-del-judoca-dev",
+		"test:all": "npm run lint && npm test && npm run test:rules && npm run test:e2e",
+		"verify": "npm run test:all && npm run build"
 	},
 	"dependencies": {
-		"html-react-parser": "^5.2.5",
+		"firebase": "^10.12.2",
 		"react": "^18.3.1",
 		"react-dom": "^18.3.1"
 	},
 	"devDependencies": {
+		"@eslint/js": "^9.39.5",
+		"@firebase/rules-unit-testing": "^3.0.4",
+		"@playwright/test": "^1.65.1",
+		"@testing-library/react": "^16.3.3",
 		"@vitejs/plugin-react": "^4.3.4",
-		"vite": "^6.2.0"
+		"eslint": "^9.39.5",
+		"eslint-plugin-jsx-a11y": "^6.10.2",
+		"eslint-plugin-react": "^7.37.5",
+		"eslint-plugin-react-hooks": "^7.1.1",
+		"firebase-admin": "^14.5.1",
+		"firebase-tools": "^15.36.0",
+		"jsdom": "^31.0.1",
+		"prettier": "^3.10.1",
+		"vite": "^6.2.0",
+		"vitest": "^5.1.0"
 	}
 }
