@@ -23,8 +23,24 @@ function transformPageElement(element, node) {
 
 export default function App() {
 	useEffect(() => {
-		initializeFirebase();
-		initializeLegacy();
+		let active = true;
+		let cleanupLegacy = () => {};
+		initializeFirebase()
+			.then((services) => {
+				if (active) cleanupLegacy = initializeLegacy(services);
+			})
+			.catch((error) => {
+				console.error("No se pudo inicializar Firebase.", error);
+				const warning = document.getElementById("cfgwarn");
+				if (warning) {
+					warning.textContent = "No se pudo conectar con Firebase. Revisá tu conexión y probá de nuevo.";
+					warning.hidden = false;
+				}
+			});
+		return () => {
+			active = false;
+			cleanupLegacy();
+		};
 	}, []);
 
 	return parse(page, { transform: transformPageElement });

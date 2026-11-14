@@ -1,68 +1,226 @@
-export async function initializeFirebase() {
-	window.__fbReady = new Promise(function (r) { window.__fbResolve = r });
-	window.claude = { use: async function (n) { var f = await window.__fbReady; return f ? (f[n] || null) : null } };
-const FB = {
-		apiKey: "AIzaSyACiz3TbNHISj35STjcxE-b-SjaWwWVy48",
-		authDomain: "casa-del-judoca.firebaseapp.com",
-		projectId: "casa-del-judoca",
-		storageBucket: "casa-del-judoca.firebasestorage.app",
-		messagingSenderId: "514893312596",
-		appId: "1:514893312596:web:fce75a937f4e75814c33c1"
-	};
-	const ADMIN_EMAILS=["davidjudo.23@gmail.com","alejkunkel@gmail.com"];
+import {
+	createUserWithEmailAndPassword,
+	onAuthStateChanged,
+	sendEmailVerification,
+	sendPasswordResetEmail,
+	signInWithEmailAndPassword,
+	signOut,
+} from "firebase/auth";
+import {
+	collection,
+	deleteDoc,
+	doc,
+	onSnapshot,
+	orderBy,
+	query,
+	setDoc,
+	updateDoc,
+} from "firebase/firestore";
+import { ADMIN_EMAILS } from "./config.js";
+import { auth, db as firestore } from "./lib/firebase.js";
 
-	const $$=id=>document.getElementById(id);
-	const ST=t=>{$$("ast").textContent=t};
-	let cur=null,started=false;
-	$$("ub").onclick=()=>{const
-	p=$$("auth");p.hidden=!p.hidden;$$("ub").setAttribute("aria-expanded",String(!p.hidden));if(!p.hidden)(cur?$$("alo"):$$("ae")).focus()};
-	try{
-	if(String(FB.apiKey).indexOf("PEGAR")===0)throw new Error("sin configurar");
-	const V="https://www.gstatic.com/firebasejs/10.12.2/";
-	const A1=await import(V+"firebase-app.js"),A2=await import(V+"firebase-auth.js"),A3=await
-	import(V+"firebase-firestore.js");
-	const {initializeApp}=A1;
-	const
-	{getAuth,onAuthStateChanged,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,sendPasswordResetEmail,sendEmailVerification}=A2;
-	const {getFirestore,doc,setDoc,updateDoc,deleteDoc,collection,query,orderBy,onSnapshot}=A3;
-	const app=initializeApp(FB),auth=getAuth(app),fs=getFirestore(app);
-	const wrap=s=>({docs:s.docs.map(d=>({id:d.id,data:()=>d.data()}))});
-	const db={
-	doc:p=>({set:d=>setDoc(doc(fs,p),d),update:d=>updateDoc(doc(fs,p),d),delete:()=>deleteDoc(doc(fs,p))}),
-	collection:n=>({
-	orderBy:(f,dir)=>({onSnapshot:(ok,err)=>onSnapshot(query(collection(fs,n),orderBy(f,dir)),s=>ok(wrap(s)),err)}),
-	onSnapshot:(ok,err)=>onSnapshot(collection(fs,n),s=>ok(wrap(s)),err)
-	})
-	};
-	const isAdmin=()=>!!(cur&&cur.email&&ADMIN_EMAILS.includes(cur.email.toLowerCase())&&cur.emailVerified);
-	const user={id:async()=>cur?cur.uid:null,canEdit:()=>isAdmin(),isOwner:()=>isAdmin()};
-	const assets={upload:blob=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>{const
-	u=String(r.result);if(u.length>230000){no(new Error("foto muy pesada"))}else
-	ok({id:u})};r.onerror=()=>no(r.error);r.readAsDataURL(blob)})};
-	const services={db:db,user:user,assets:assets};
-	const msgs={"auth/invalid-email":"El correo no es válido.","auth/email-already-in-use":"Ese correo ya tiene una cuenta. Probá con Ingresar.","auth/weak-password":"La contraseña es muy corta. Usá al menos 6 caracteres.","auth/invalid-credential":"Correo o contraseña incorrectos.","auth/user-not-found":"Correo o contraseña incorrectos.","auth/wrong-password":"Correo o contraseña incorrectos.","auth/missing-password":"Escribí tu contraseña.","auth/too-many-requests":"Demasiados intentos. Esperá unos minutos."};
-	const err=e=>ST(msgs[e&&e.code]||"No se pudo. Probá de nuevo.");
-	const after=t=>{try{sessionStorage.setItem("authmsg",t)}catch(e){}};
-	onAuthStateChanged(auth,u=>{
-	cur=u;
-	if(!started){
-	started=true;
-	$$("aout").hidden=!u;$$("ain").hidden=!!u;
-	if(u){$$("aem").textContent="Ingresaste como "+u.email+(u.emailVerified?"":". Todavía falta confirmar tu correo: revisá tu bandeja de entrada.");$$("ub").textContent="Mi cuenta"}
-	try{const
-	m=sessionStorage.getItem("authmsg");if(m){sessionStorage.removeItem("authmsg");$$("ok").textContent=m}}catch(e){}
-	window.__fbResolve(services);
-	}else{location.reload()}
-	});
-	$$("ali").onclick=async()=>{const e=$$("ae").value.trim(),p=$$("apw").value;if(!e||!p){ST("Escribí tu correo y tu contraseña.");return}ST("Ingresando…");try{after("Ingresaste correctamente.");await
-	signInWithEmailAndPassword(auth,e,p)}catch(x){after("");err(x)}};
-	$$("arg").onclick=async()=>{const e=$$("ae").value.trim(),p=$$("apw").value;if(!e||!p){ST("Escribí tu correo y una contraseña.");return}ST("Creando cuenta…");try{after("Cuenta creada. Te mandamos un correo para confirmar tu dirección.");const c=await createUserWithEmailAndPassword(auth,e,p);try{await
-	sendEmailVerification(c.user)}catch(z){}}catch(x){after("");err(x)}};
-	$$("afp").onclick=async()=>{const e=$$("ae").value.trim();if(!e){ST("Escribí tu correo y volvé a tocar este botón.");return}try{await sendPasswordResetEmail(auth,e);ST("Si el correo tiene una cuenta, te mandamos un enlace para cambiar la contraseña.")}catch(x){err(x)}};
-	$$("alo").onclick=async()=>{try{after("Saliste de tu cuenta.");await signOut(auth)}catch(x){after("");err(x)}};
-	}catch(e){
-	if(String(FB.apiKey).indexOf("PEGAR")!==0)$$("cfgwarn").textContent="No se pudo conectar con la base de datos. Revisá tu conexión y probá de nuevo.";
-	$$("cfgwarn").hidden=false;
-	window.__fbResolve(null);
+const authMessages = {
+	"auth/invalid-email": "El correo no es válido.",
+	"auth/email-already-in-use": "Ese correo ya tiene una cuenta. Probá con Ingresar.",
+	"auth/weak-password": "La contraseña es muy corta. Usá al menos 6 caracteres.",
+	"auth/invalid-credential": "Correo o contraseña incorrectos.",
+	"auth/user-not-found": "Correo o contraseña incorrectos.",
+	"auth/wrong-password": "Correo o contraseña incorrectos.",
+	"auth/missing-password": "Escribí tu contraseña.",
+	"auth/too-many-requests": "Demasiados intentos. Esperá unos minutos.",
+};
+
+let servicesPromise;
+
+function showConfigurationError(message) {
+	const warning = document.getElementById("cfgwarn");
+	if (warning) {
+		warning.textContent = message;
+		warning.hidden = false;
 	}
+}
+
+export function initializeFirebase() {
+	if (servicesPromise) return servicesPromise;
+
+	servicesPromise = new Promise((resolve, reject) => {
+		let currentUser = null;
+		let hasAuthState = false;
+		let globalMessage = "";
+		const authListeners = new Set();
+		const getElement = (id) => document.getElementById(id);
+		const setAuthStatus = (message) => {
+			const status = getElement("ast");
+			if (status) status.textContent = message;
+		};
+		const setGlobalStatus = (message) => {
+			globalMessage = message;
+			const status = getElement("ok");
+			if (status) status.textContent = message;
+		};
+		const firestoreServices = {
+			doc: (path) => ({
+				set: (data) => setDoc(doc(firestore, path), data),
+				update: (data) => updateDoc(doc(firestore, path), data),
+				delete: () => deleteDoc(doc(firestore, path)),
+			}),
+			collection: (name) => ({
+				orderBy: (field, direction) => ({
+					onSnapshot: (onNext, onError) =>
+						onSnapshot(query(collection(firestore, name), orderBy(field, direction)), (snapshot) =>
+							onNext({ docs: snapshot.docs.map((item) => ({ id: item.id, data: () => item.data() })) }),
+						onError),
+				}),
+				onSnapshot: (onNext, onError) =>
+					onSnapshot(collection(firestore, name), (snapshot) =>
+						onNext({ docs: snapshot.docs.map((item) => ({ id: item.id, data: () => item.data() })) }),
+					onError),
+			}),
+		};
+		const user = {
+			id: async () => currentUser?.uid ?? null,
+			canEdit: () =>
+				!!(
+					currentUser?.email &&
+					ADMIN_EMAILS.includes(currentUser.email.toLowerCase()) &&
+					currentUser.emailVerified
+				),
+			isOwner: () => user.canEdit(),
+			subscribe: (listener) => {
+				authListeners.add(listener);
+				if (hasAuthState) listener(currentUser);
+				return () => authListeners.delete(listener);
+			},
+		};
+		const assets = {
+			upload: (blob) =>
+				new Promise((resolveUpload, rejectUpload) => {
+					const reader = new FileReader();
+					reader.onload = () => {
+						const dataUrl = String(reader.result);
+						if (dataUrl.length > 230000) {
+							rejectUpload(new Error("foto muy pesada"));
+						} else {
+							resolveUpload({ id: dataUrl });
+						}
+					};
+					reader.onerror = () => rejectUpload(reader.error ?? new Error("No se pudo leer la foto."));
+					reader.readAsDataURL(blob);
+				}),
+		};
+		const services = { db: firestoreServices, user, assets };
+
+		const updateAuthPanel = (nextUser) => {
+			currentUser = nextUser;
+			const accountButton = getElement("ub");
+			const loginPanel = getElement("ain");
+			const logoutPanel = getElement("aout");
+			const accountMessage = getElement("aem");
+			if (logoutPanel) logoutPanel.hidden = !nextUser;
+			if (loginPanel) loginPanel.hidden = !!nextUser;
+			if (accountButton) accountButton.textContent = nextUser ? "Mi cuenta" : "Ingresar";
+			if (accountMessage && nextUser) {
+				accountMessage.textContent =
+					"Ingresaste como " +
+					nextUser.email +
+					(nextUser.emailVerified
+						? ""
+						: ". Todavía falta confirmar tu correo: revisá tu bandeja de entrada.");
+			}
+			authListeners.forEach((listener) => listener(nextUser));
+			if (globalMessage) {
+				const status = getElement("ok");
+				if (status) status.textContent = globalMessage;
+				globalMessage = "";
+			}
+		};
+		const showAuthError = (error) => {
+			setAuthStatus(authMessages[error?.code] ?? "No se pudo. Probá de nuevo.");
+		};
+
+		getElement("ub")?.addEventListener("click", () => {
+			const panel = getElement("auth");
+			const button = getElement("ub");
+			if (!panel || !button) return;
+			panel.hidden = !panel.hidden;
+			button.setAttribute("aria-expanded", String(!panel.hidden));
+			if (!panel.hidden) (currentUser ? getElement("alo") : getElement("ae"))?.focus();
+		});
+		getElement("ali")?.addEventListener("click", async () => {
+			const email = getElement("ae")?.value.trim() ?? "";
+			const password = getElement("apw")?.value ?? "";
+			if (!email || !password) {
+				setAuthStatus("Escribí tu correo y tu contraseña.");
+				return;
+			}
+			setAuthStatus("Ingresando…");
+			try {
+				const result = await signInWithEmailAndPassword(auth, email, password);
+				updateAuthPanel(result.user);
+				setGlobalStatus("Ingresaste correctamente.");
+				setAuthStatus("");
+			} catch (error) {
+				showAuthError(error);
+			}
+		});
+		getElement("arg")?.addEventListener("click", async () => {
+			const email = getElement("ae")?.value.trim() ?? "";
+			const password = getElement("apw")?.value ?? "";
+			if (!email || !password) {
+				setAuthStatus("Escribí tu correo y una contraseña.");
+				return;
+			}
+			setAuthStatus("Creando cuenta…");
+			try {
+				const result = await createUserWithEmailAndPassword(auth, email, password);
+				updateAuthPanel(result.user);
+				try {
+					await sendEmailVerification(result.user);
+					setGlobalStatus("Cuenta creada. Te mandamos un correo para confirmar tu dirección.");
+				} catch {
+					setGlobalStatus("La cuenta se creó, pero no se pudo enviar el correo de confirmación. Probá de nuevo más tarde.");
+				}
+				setAuthStatus("");
+			} catch (error) {
+				showAuthError(error);
+			}
+		});
+		getElement("afp")?.addEventListener("click", async () => {
+			const email = getElement("ae")?.value.trim() ?? "";
+			if (!email) {
+				setAuthStatus("Escribí tu correo y volvé a tocar este botón.");
+				return;
+			}
+			try {
+				await sendPasswordResetEmail(auth, email);
+				setAuthStatus("Si el correo tiene una cuenta, te mandamos un enlace para cambiar la contraseña.");
+			} catch (error) {
+				showAuthError(error);
+			}
+		});
+		getElement("alo")?.addEventListener("click", async () => {
+			try {
+				await signOut(auth);
+				setGlobalStatus("Saliste de tu cuenta.");
+				setAuthStatus("");
+			} catch (error) {
+				showAuthError(error);
+			}
+		});
+
+		onAuthStateChanged(
+			auth,
+			(nextUser) => {
+				hasAuthState = true;
+				updateAuthPanel(nextUser);
+				resolve(services);
+			},
+			(error) => {
+				showConfigurationError("No se pudo conectar con Firebase. Revisá tu conexión y probá de nuevo.");
+				reject(error);
+			},
+		);
+	});
+
+	return servicesPromise;
 }

@@ -1,7 +1,13 @@
-export function initializeLegacy() {
+import { CFG } from "./config.js";
+
+export function initializeLegacy(services) {
 const $ = s => document.querySelector(s);
-		let db = null, assets = null, uid = null, canAdmin = false;
-		const CFG = {precio: "5.000", alias: "Elyaca.ok", link: "", wa: "5491167343398", ig: "elyacaa"};
+		const db = services.db, user = services.user, assets = services.assets;
+		let uid = null, canAdmin = false, disposed = false;
+		const unsubscribers = [];
+		let unsubscribeAuth = () => {};
+		let unsubscribeReports = () => {};
+		let listingTimer;
 		const payOn = () => !!(CFG.precio && (CFG.alias || CFG.link) && CFG.wa);
 		let MOD = {}, VER = {}, REV = [], REP = [], WNT = []; const M = id => MOD[id] || {}; const vis = d => M(d.id).approved === true || canAdmin || (uid && d.data().owner === uid);
 		async function setMod(id, p) {await db.doc("mod/" + id).set(Object.assign({approved: false, featured: false}, MOD[id] || {}, p))}
@@ -9,7 +15,8 @@ const $ = s => document.querySelector(s);
 		if (CFG.ig) $("#ig").innerHTML = '<a class="btn" target="_blank" rel="noopener" href="https://instagram.com/' + esc(CFG.ig) + '">Instagram (se abre en otra pestaña)</a>';
 		function esc(s) {return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]))}
 		$("#tg").onclick = () => {const o = $("#fm").classList.toggle("on"); $("#tg").setAttribute("aria-expanded", o); if (o) $("#t").focus()};
-		["#q", "#fs", "#so"].forEach(i => $(i).addEventListener("input", render));
+		const onFilterInput = () => render();
+		["#q", "#fs", "#so"].forEach(i => $(i).addEventListener("input", onFilterInput));
 		document.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", c.classList.contains("on")));
 		$("#chips").onclick = e => {const b = e.target.closest(".chip"); if (!b) return; cat = b.dataset.c; document.querySelectorAll(".chip").forEach(c => {c.classList.toggle("on", c === b); c.setAttribute("aria-pressed", c === b)}); render()};
 		let all = [], cat = "", FV = []; try {FV = JSON.parse(localStorage.getItem("fav") || "[]")} catch (e) { }
@@ -189,18 +196,41 @@ const $ = s => document.querySelector(s);
 		$("#ab").onclick = () => {const p = $("#ap"); p.hidden = !p.hidden; $("#ab").setAttribute("aria-expanded", String(!p.hidden))};
 		ap();
 		(async () => {
-			const timer = setTimeout(() => {if (!db) $("#msg").textContent = "No se pudieron cargar las publicaciones."}, 10000);
-			try {
-				db = await window.claude.use("db"); const user = await window.claude.use("user"); assets = await window.claude.use("assets");
-				if (user) {try {uid = await user.id(); canAdmin = user.canEdit()} catch (e) { } }
-			} catch (e) { }
+			if (user) {uid = await user.id(); canAdmin = user.canEdit()}
+			unsubscribeAuth = user?.subscribe(() => {
+				user.id().then(nextUid => {
+					if (disposed) return;
+					const wasAdmin = canAdmin;
+					uid = nextUid;
+					canAdmin = user.canEdit();
+					if (wasAdmin && !canAdmin) {
+						unsubscribeReports();
+						unsubscribeReports = () => {};
+						REP = [];
+					} else if (!wasAdmin && canAdmin) {
+						unsubscribeReports = db.collection("reports").onSnapshot(s => {
+							REP = s.docs.map(d => Object.assign({id: d.id}, d.data()));
+							admin();
+						}, () => {});
+					}
+					render();
+				});
+			}) ?? (() => {});
 			if (!assets) $("#phw").style.display = "none";
-			if (!db) return;
-			db.collection("mod").onSnapshot(s => {MOD = {}; s.docs.forEach(d => {MOD[d.id] = d.data()}); render()}, () => { });
-			db.collection("reviews").onSnapshot(s => {REV = s.docs.map(d => Object.assign({id: d.id}, d.data())); render()}, () => { });
-			db.collection("wanted").orderBy("ts", "desc").onSnapshot(s => {WNT = s.docs.map(d => Object.assign({id: d.id}, d.data())); wanted(); admin()}, () => {$("#wm").textContent = "No se pudieron cargar las búsquedas."});
-			if (canAdmin) db.collection("reports").onSnapshot(s => {REP = s.docs.map(d => Object.assign({id: d.id}, d.data())); admin()}, () => { });
-			db.collection("sellers").onSnapshot(s => {VER = {}; s.docs.forEach(d => {if (d.data().verified) VER[d.id] = true}); render()}, () => { });
-			db.collection("listings").orderBy("ts", "desc").onSnapshot(s => {clearTimeout(timer); all = s.docs; render()}, () => {$("#msg").textContent = "No se pudieron cargar las publicaciones."});
+			unsubscribers.push(db.collection("mod").onSnapshot(s => {MOD = {}; s.docs.forEach(d => {MOD[d.id] = d.data()}); render()}, () => { }));
+			unsubscribers.push(db.collection("reviews").onSnapshot(s => {REV = s.docs.map(d => Object.assign({id: d.id}, d.data())); render()}, () => { }));
+			unsubscribers.push(db.collection("wanted").orderBy("ts", "desc").onSnapshot(s => {WNT = s.docs.map(d => Object.assign({id: d.id}, d.data())); wanted(); admin()}, () => {$("#wm").textContent = "No se pudieron cargar las búsquedas."}));
+			if (canAdmin) unsubscribeReports = db.collection("reports").onSnapshot(s => {REP = s.docs.map(d => Object.assign({id: d.id}, d.data())); admin()}, () => { });
+			unsubscribers.push(db.collection("sellers").onSnapshot(s => {VER = {}; s.docs.forEach(d => {if (d.data().verified) VER[d.id] = true}); render()}, () => { }));
+			listingTimer = setTimeout(() => {if (!db) $("#msg").textContent = "No se pudieron cargar las publicaciones."}, 10000);
+			unsubscribers.push(db.collection("listings").orderBy("ts", "desc").onSnapshot(s => {clearTimeout(listingTimer); all = s.docs; render()}, () => {$("#msg").textContent = "No se pudieron cargar las publicaciones."}));
 		})();
+		return () => {
+			disposed = true;
+			clearTimeout(listingTimer);
+			unsubscribeAuth();
+			unsubscribeReports();
+			unsubscribers.forEach(unsubscribe => unsubscribe());
+			["#q", "#fs", "#so"].forEach(i => $(i).removeEventListener("input", onFilterInput));
+		};
 }
