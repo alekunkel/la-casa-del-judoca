@@ -1,0 +1,73 @@
+rules_version = '2';
+
+// REGLAS DE SEGURIDAD DE LA CASA DEL JUDOKA
+// Se pegan en Firebase: Firestore Database > Reglas > Publicar.
+// Los correos de administrador tienen que ser los mismos que ADMIN_EMAILS en index.html.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // Administradores: solo con uno de estos correos Y con el correo confirmado.
+    function isAdmin() {
+      return signedIn()
+        && request.auth.token.email in [
+          'davidjudo.23@gmail.com',
+          'alejkunkel@gmail.com'
+        ]
+        && request.auth.token.email_verified == true;
+    }
+
+    // Publicaciones de productos
+    match /listings/{id} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.owner == request.auth.uid;
+      allow update: if isAdmin()
+        || (signedIn() && resource.data.owner == request.auth.uid
+            && request.resource.data.owner == resource.data.owner);
+      allow delete: if isAdmin() || (signedIn() && resource.data.owner == request.auth.uid);
+    }
+
+    // "Se busca"
+    match /wanted/{id} {
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.owner == request.auth.uid;
+      allow update: if isAdmin();
+      allow delete: if isAdmin() || (signedIn() && resource.data.owner == request.auth.uid);
+    }
+
+    // Aprobaciones y destacados: solo el administrador escribe
+    match /mod/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Vendedores verificados: solo el administrador escribe
+    match /sellers/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Denuncias: cualquiera con cuenta denuncia, solo el administrador las lee
+    match /reports/{id} {
+      allow create: if signedIn();
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Opiniones: una por comprador y por vendedor, nunca sobre uno mismo
+    match /reviews/{id} {
+      allow read: if true;
+      allow create, update: if signedIn()
+        && request.resource.data.by == request.auth.uid
+        && request.resource.data.seller != request.auth.uid
+        && id == request.auth.uid + '_' + request.resource.data.seller
+        && request.resource.data.rating is number
+        && request.resource.data.rating >= 1
+        && request.resource.data.rating <= 5;
+      allow delete: if isAdmin();
+    }
+  }
+}
