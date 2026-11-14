@@ -39,3 +39,12 @@
   `shrinkImage` y la conversión limitada a data URL.
 - No se ejecutaron pruebas. Lint y compilación pasaron.
 - La interfaz todavía consume temporalmente el adaptador legacy.
+
+## Fase 3: estructura React
+
+- `App` ahora envuelve la vista en `AuthProvider`.
+- La carga temporal de `page.html` y la inicialización de legacy quedaron
+  aisladas en `LegacySection`, con limpieza de suscripciones al desmontarse.
+- La conversión de valores del selector existente se conserva durante la
+  transición.
+- No se ejecutaron pruebas. Lint y compilación pasaron.
