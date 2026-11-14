@@ -18,17 +18,7 @@ import {
 } from "firebase/firestore";
 import { ADMIN_EMAILS } from "./config.js";
 import { auth, db as firestore } from "./lib/firebase.js";
-
-const authMessages = {
-	"auth/invalid-email": "El correo no es válido.",
-	"auth/email-already-in-use": "Ese correo ya tiene una cuenta. Probá con Ingresar.",
-	"auth/weak-password": "La contraseña es muy corta. Usá al menos 6 caracteres.",
-	"auth/invalid-credential": "Correo o contraseña incorrectos.",
-	"auth/user-not-found": "Correo o contraseña incorrectos.",
-	"auth/wrong-password": "Correo o contraseña incorrectos.",
-	"auth/missing-password": "Escribí tu contraseña.",
-	"auth/too-many-requests": "Demasiados intentos. Esperá unos minutos.",
-};
+import { getAuthErrorMessage } from "./utils/authMessages.js";
 
 let servicesPromise;
 
@@ -135,7 +125,7 @@ export function initializeFirebase() {
 			}
 		};
 		const showAuthError = (error) => {
-			setAuthStatus(authMessages[error?.code] ?? "No se pudo. Probá de nuevo.");
+			setAuthStatus(getAuthErrorMessage(error));
 		};
 
 		getElement("ub")?.addEventListener("click", () => {
