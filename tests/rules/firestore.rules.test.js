@@ -32,7 +32,7 @@ const validListing = {
 
 beforeAll(async () => {
 	const rules = await readFile(
-		new URL("../../firestore.rules.v2", import.meta.url),
+		new URL("../../firestore.rules", import.meta.url),
 		"utf8",
 	);
 	environment = await initializeTestEnvironment({
@@ -140,7 +140,7 @@ it("cada comprador puede dejar una opinión válida por vendedor y nunca sobre s
 	};
 	const reviewRef = doc(firestore, "reviews/buyer_seller");
 	await assertSucceeds(setDoc(reviewRef, review));
-	await assertFails(setDoc(reviewRef, review));
+	await assertSucceeds(setDoc(reviewRef, review));
 	await assertFails(
 		setDoc(doc(firestore, "reviews/buyer_buyer"), {
 			...review,

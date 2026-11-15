@@ -19,22 +19,23 @@ No se desplegó producción ni se tocaron `firebase.json` ni `firestore.rules`.
 
 ## Cambios principales aplicados
 
-- `AuthContext` usa `user.getIdTokenResult().claims.admin === true`.
-- `services/listings.js` y `services/wanted.js` se adaptaron para tener
-  `subscribeVisible...` con visibilidad por `status` y `owner`.
+- `AuthContext` usa `user.getIdTokenResult(true).claims.admin === true` para
+  reforzar la lectura del claim recién asignado.
+- `services/listings.js` y `services/wanted.js` usan `subscribeVisible` para
+  combinar consultas sin `orderBy` en Firestore y sin duplicados.
 - `ListingForm`, `ListingCard`, `ListingGrid`, `WantedSection` y `AdminPanel`
-  usan `status`/`featured` en lugar del modelo de `mod`.
-- `firebase.dev.json` y los scripts `test:rules`/`emulators` apuntan a las
-  reglas v2 solo en emulación.
-- `scripts/migrate-status.mjs` quedó pensado para dry-run por defecto, con
+  usan `status`/`featured` y no dependen de una colección `mod`.
+- `firebase.dev.json` y los scripts de emulación leen `firestore.rules`, la
+  fuente única de verdad del proyecto.
+- `scripts/migrate-status.mjs` queda pensado para dry-run por defecto, con
   proyecto obligatorio y bloqueo de producción.
 
 ## Qué quedó pendiente o no ejecutado
 
 - Validación E2E completa con Playwright en este entorno: pendiente porque la
   descarga del navegador no concluyó en esta sesión.
-- Despliegue real y sustitución de `firestore.rules` por `firestore.rules.v2`:
-  no se hizo, por diseño.
+- Despliegue real y sustitución de reglas: no se hizo, por diseño; se usa
+  `firestore.rules` como fuente única de verdad.
 - Revisión manual con cuenta real y claims de administradores: pendiente o a
   cargo de una persona ya que exige validar flujos en entorno no emulado.
 

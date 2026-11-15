@@ -15,13 +15,16 @@ vi.mock("firebase/auth", () => authMocks);
 vi.mock("../../src/lib/firebase.js", () => ({ auth: {} }));
 
 describe("AuthContext", () => {
+	let getIdTokenResultMock;
+
 	beforeEach(() => {
+		getIdTokenResultMock = vi.fn().mockResolvedValue({ claims: { admin: true } });
 		authMocks.onAuthStateChanged.mockImplementation((_auth, onUser) => {
 			onUser({
 				uid: "admin",
 				email: "davidjudo.23@gmail.com",
 				emailVerified: false,
-				getIdTokenResult: vi.fn().mockResolvedValue({ claims: { admin: true } }),
+				getIdTokenResult: getIdTokenResultMock,
 			});
 			return vi.fn();
 		});
@@ -31,16 +34,18 @@ describe("AuthContext", () => {
 		const wrapper = ({ children }) => <AuthProvider>{children}</AuthProvider>;
 		const { result } = renderHook(() => useAuth(), { wrapper });
 		await waitFor(() => expect(result.current.loading).toBe(false));
+		expect(getIdTokenResultMock).toHaveBeenCalledWith(true);
 		expect(result.current.isAdmin).toBe(true);
 	});
 
 	it("rechaza usuarios con correo administrador pero sin claim", async () => {
+		getIdTokenResultMock = vi.fn().mockResolvedValue({ claims: {} });
 		authMocks.onAuthStateChanged.mockImplementation((_auth, onUser) => {
 			onUser({
 				uid: "admin-like",
 				email: "davidjudo.23@gmail.com",
 				emailVerified: true,
-				getIdTokenResult: vi.fn().mockResolvedValue({ claims: {} }),
+				getIdTokenResult: getIdTokenResultMock,
 			});
 			return vi.fn();
 		});

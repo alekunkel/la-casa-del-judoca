@@ -66,10 +66,11 @@ node scripts/migrate-status.mjs --project <id-del-proyecto> --apply
 
 ## 6. Reemplazar las reglas y desplegarlas
 
-1. Sustituir `firestore.rules` por `firestore.rules.v2` en el entorno objetivo.
-2. Revisar una vez más el comportamiento en el proyecto de staging.
+1. Validar el comportamiento con `firestore.rules` y con el proyecto de staging.
+2. Confirmar que la versión de producción está correctamente elegida antes de
+   publicar nuevas reglas.
 3. Desplegar las reglas con la aprobación humana explícita.
-4. No hacer este paso sin validar primero el comportamiento y sin confirmar la
+4. No hacer este paso sin revisar el comportamiento y sin confirmar la
    versión de producción.
 
 ## 7. Verificación manual y con cuenta de prueba

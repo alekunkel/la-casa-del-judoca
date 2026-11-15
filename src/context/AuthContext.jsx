@@ -30,7 +30,7 @@ export function AuthProvider({ children }) {
 					return;
 				}
 				try {
-					const tokenResult = await nextUser.getIdTokenResult();
+					const tokenResult = await nextUser.getIdTokenResult(true);
 					setIsAdmin(tokenResult.claims.admin === true);
 				} catch (error) {
 					console.error("No se pudo resolver el token de autenticación.", error);

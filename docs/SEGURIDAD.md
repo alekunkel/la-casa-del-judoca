@@ -20,9 +20,9 @@ personas usuarias.
 
 ## Reglas y administración
 
-- `firestore.rules` es la versión actualmente usada por la guía de despliegue.
-- `firestore.rules.v2` es solo una propuesta para revisar y probar en el
-  emulador. No publicarla desde este repositorio sin aprobación humana.
+- `firestore.rules` es la única versión usada por la guía de despliegue y por
+  los emuladores locales. La solución de producción no se basa en una copia
+  paralela ni en una variante alternativa.
 - La administración se define con el custom claim `admin`; no hay una lista fija
   de correos en el código cliente. `scripts/set-admin-claims.mjs` requiere
   credenciales locales y bloquea explícitamente el id de producción.

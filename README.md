@@ -55,8 +55,8 @@ revisar el proyecto y recibir aprobación.
 - `src/services/`: operaciones de Firestore.
 - `src/lib/`: inicialización del SDK Firebase.
 - `docs/`: revisión manual, accesibilidad, seguridad y fotos.
-- `firestore.rules`: reglas actuales; `firestore.rules.v2` es solo una
-  propuesta para el emulador.
+- `firestore.rules`: fuente única de verdad para la app y para el emulador.
+  No se usa una segunda versión en producción ni en la validación local.
 - [LEEME-guia.txt](LEEME-guia.txt): guía de publicación para personas no técnicas.
 
 La configuración local se guarda en variables `VITE_FIREBASE_*`. No agregues

@@ -23,7 +23,7 @@ export default defineConfig({
 		{
 			command:
 				"firebase emulators:start --config firebase.dev.json --only auth,firestore --project casa-del-judoca-dev",
-			port: 9099,
+			url: "http://127.0.0.1:8080",
 			reuseExistingServer: !process.env.CI,
 			timeout: 120000,
 		},

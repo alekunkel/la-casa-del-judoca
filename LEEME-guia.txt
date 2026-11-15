@@ -12,8 +12,8 @@ IMPORTANTE
   La clave web no es una contraseña, pero no se deben subir archivos .env.local
   al repositorio.
 - El modo de desarrollo se conecta siempre a emuladores locales; no modifica
-  Firebase real. Las reglas propuestas en firestore.rules.v2 son solo para
-  revisión y pruebas locales: no las publiques sin una revisión humana.
+  Firebase real. Las reglas de `firestore.rules` son la versión usada por el
+  emulador y por la guía de despliegue: no se mantienen copias paralelas.
 - No publiques la aplicación ni cambies reglas, dominios o planes de pago sin
   la aprobación de la persona responsable.
 
@@ -74,7 +74,7 @@ Antes de publicar, la persona responsable debe revisar:
 - La política de privacidad y el tratamiento de datos personales.
 - El estado de las publicaciones pendientes y la privacidad de las fotos.
 
-`firestore.rules.v2` es una propuesta separada; no la copies sobre las reglas
+`firestore.rules` es la única fuente de verdad; no la reemplaces por una
 del proyecto real. Las reglas de Storage también requieren revisión. Consultá
 `docs/SEGURIDAD.md`, `docs/PLAN_FOTOS_STORAGE.md` y `docs/ACCESIBILIDAD.md`.
 
