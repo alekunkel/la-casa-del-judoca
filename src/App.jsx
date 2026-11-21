@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import A11yPanel from "./components/a11y/A11yPanel.jsx";
 import AuthPanel from "./components/auth/AuthPanel.jsx";
 import {
@@ -33,7 +33,7 @@ function AppContent() {
 	const { favorites, toggleFavorite } = useFavorites();
 	const listingsSubscription = useCallback(
 		(onData, onError) => {
-			if (loading) return () => {};
+			if (loading) return () => { };
 			return subscribeVisibleListings({ uid, isAdmin }, onData, onError);
 		},
 		[isAdmin, loading, uid],
@@ -48,14 +48,14 @@ function AppContent() {
 	);
 	const wantedSubscription = useCallback(
 		(onData, onError) => {
-			if (loading) return () => {};
+			if (loading) return () => { };
 			return subscribeVisibleWanted({ uid, isAdmin }, onData, onError);
 		},
 		[isAdmin, loading, uid],
 	);
 	const reportsSubscription = useCallback(
 		(onData, onError) =>
-			isAdmin ? subscribeReports(onData, onError) : () => {},
+			isAdmin ? subscribeReports(onData, onError) : () => { },
 		[isAdmin],
 	);
 	const listingsState = useCollection(listingsSubscription);
@@ -71,6 +71,34 @@ function AppContent() {
 		reviewsState.error ||
 		wantedState.error ||
 		(isAdmin && reportsState.error);
+
+	// Diagnóstico: informa en la consola CUÁL lectura de Firestore falla y por qué.
+	useEffect(() => {
+		const errores = {
+			publicaciones: listingsState.error,
+			vendedores: sellersState.error,
+			opiniones: reviewsState.error,
+			"se busca": wantedState.error,
+			denuncias: isAdmin ? reportsState.error : null,
+		};
+		for (const [nombre, error] of Object.entries(errores)) {
+			if (error) {
+				console.error(
+					`Firestore (${nombre}):`,
+					error.code ?? "sin-codigo",
+					error.message ?? error,
+				);
+			}
+		}
+	}, [
+		listingsState.error,
+		sellersState.error,
+		reviewsState.error,
+		wantedState.error,
+		reportsState.error,
+		isAdmin,
+	]);
+
 	const availableCount = listingsState.data.filter(
 		(listing) => !listing.sold && listing.status === "approved",
 	).length;
