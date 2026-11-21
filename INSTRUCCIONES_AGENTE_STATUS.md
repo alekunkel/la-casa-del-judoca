@@ -1,13 +1,11 @@
 # Instrucciones para el agente: adaptar la app al modelo `status` y a las reglas v2
 
 > Copiar a la raíz del repo como `MIGRATION_STATUS.md`. Continúa el trabajo de `INSTRUCCIONES_AGENTE_MIGRACION.md`; las reglas de oro de ese documento siguen vigentes (un paso, un commit; accesibilidad primero; no tocar producción; no inventar).
-
 ## 0. Objetivo
 
 La migración a React está terminada, pero **la interfaz y las reglas candidatas `firestore.rules.v2` son incompatibles**. Tu tarea es adaptar el código para que funcione con las reglas v2, probarlo en emuladores y dejar documentado el plan de despliegue. **No despliegues nada.**
 
 ## 1. Diagnóstico verificado (leelo en el código antes de empezar)
-
 La interfaz hoy decide qué es "aprobado" y "destacado" con la colección `mod`, mientras que las reglas v2 lo hacen con campos dentro de cada documento:
 
 | Tema | Interfaz actual | Reglas v2 |

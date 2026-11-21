@@ -8,7 +8,7 @@ vi.mock("../../src/services/listings.js", () => ({
 	setListingFeatured: vi.fn(),
 	setListingStatus: vi.fn(),
 }));
-vi.mock("../../src/services/moderation.js", () => ({
+vi.mock("../../src/services/sellers.js", () => ({
 	setSellerVerification: vi.fn(),
 }));
 vi.mock("../../src/services/reports.js", () => ({
