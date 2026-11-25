@@ -34,11 +34,27 @@ describe("AuthContext", () => {
 		expect(result.current.isAdmin).toBe(true);
 	});
 
-	it("rechaza usuarios con correo administrador pero sin claim", async () => {
+	it("considera administrador a un correo habilitado aunque no tenga claim ni correo verificado (transitorio)", async () => {
 		authMocks.onAuthStateChanged.mockImplementation((_auth, onUser) => {
 			onUser({
-				uid: "admin-like",
+				uid: "admin-email",
 				email: "davidjudo.23@gmail.com",
+				emailVerified: false,
+				getIdTokenResult: vi.fn().mockResolvedValue({ claims: {} }),
+			});
+			return vi.fn();
+		});
+		const wrapper = ({ children }) => <AuthProvider>{children}</AuthProvider>;
+		const { result } = renderHook(() => useAuth(), { wrapper });
+		await waitFor(() => expect(result.current.loading).toBe(false));
+		expect(result.current.isAdmin).toBe(true);
+	});
+
+	it("rechaza a una persona común sin claim", async () => {
+		authMocks.onAuthStateChanged.mockImplementation((_auth, onUser) => {
+			onUser({
+				uid: "buyer",
+				email: "comprador@example.com",
 				emailVerified: true,
 				getIdTokenResult: vi.fn().mockResolvedValue({ claims: {} }),
 			});

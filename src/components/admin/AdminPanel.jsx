@@ -1,4 +1,8 @@
-import { deleteListing, setListingStatus } from "../../services/listings.js";
+import {
+	deleteListing,
+	setListingFeatured,
+	setListingStatus,
+} from "../../services/listings.js";
 import { deleteReport } from "../../services/reports.js";
 import { deleteWanted, setWantedStatus } from "../../services/wanted.js";
 
@@ -12,6 +16,7 @@ export default function AdminPanel({
 }) {
 	if (!isAdmin) return null;
 	const pendingListings = listings.filter((listing) => listing.status !== "approved");
+	const approvedListings = listings.filter((listing) => listing.status === "approved");
 	const pendingWanted = wanted.filter((item) => item.status !== "approved");
 	const featuredCount = listings.filter((listing) => listing.featured).length;
 	const summary = [
@@ -28,7 +33,7 @@ export default function AdminPanel({
 			onAnnouncement(success);
 		} catch (error) {
 			console.error(failure, error);
-			onAnnouncement(failure);
+			onAnnouncement(`${failure} (${error?.code || error?.message || "error"})`);
 		}
 	};
 
@@ -76,6 +81,45 @@ export default function AdminPanel({
 								}
 							>
 								Rechazar y borrar
+							</button>
+						</div>
+					</div>
+				))}
+				{approvedListings.map((listing) => (
+					<div key={listing.id} className="pay">
+						<p>
+							Aprobada: {listing.title || ""} — {listing.seller || "sin nombre"}
+						</p>
+						<div className="acts">
+							<button
+								className="x"
+								type="button"
+								aria-label={`${listing.featured ? "Quitar destacado" : "Destacar"}: ${listing.title}`}
+								onClick={() =>
+									runAction(
+										() => setListingFeatured(listing.id, !listing.featured),
+										listing.featured
+											? "Publicación quitada de destacados."
+											: "Publicación destacada.",
+										"No se pudo cambiar el estado destacado.",
+									)
+								}
+							>
+								{listing.featured ? "Quitar destacado" : "Destacar"}
+							</button>
+							<button
+								className="x"
+								type="button"
+								aria-label={`Ocultar publicación: ${listing.title}`}
+								onClick={() =>
+									runAction(
+										() => setListingStatus(listing.id, "pending"),
+										"Publicación movida a pendientes.",
+										"No se pudo ocultar la publicación.",
+									)
+								}
+							>
+								Ocultar
 							</button>
 						</div>
 					</div>

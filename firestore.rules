@@ -1,8 +1,11 @@
 rules_version = '2';
 
-// REGLAS DE SEGURIDAD DE LA CASA DEL JUDOKA
+// REGLAS DE SEGURIDAD DE LA CASA DEL JUDOKA (modelo con campo "status")
 // Se pegan en Firebase: Firestore Database > Reglas > Publicar.
-// Los correos de administrador tienen que ser los mismos que ADMIN_EMAILS en index.html.
+//
+// IMPORTANTE: estas reglas esperan que cada documento de "listings" y de "wanted"
+// tenga el campo status = "pending" o "approved". Los documentos viejos que no lo
+// tengan quedan invisibles para el público hasta que se les agregue.
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -11,63 +14,153 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    // Administradores: solo con uno de estos correos Y con el correo confirmado.
+    // Administradores:
+    //  - con el custom claim admin = true (forma recomendada), o
+    //  - con uno de estos correos. NO se exige correo verificado.
+    //    CUIDADO: las dos cuentas administradoras tienen que estar ya
+    //    registradas en Authentication; si no, otra persona podría crear
+    //    una cuenta con ese correo y obtener permisos de administrador.
     function isAdmin() {
-      return signedIn()
-        && request.auth.token.email in [
+      return signedIn() && (
+        request.auth.token.get('admin', false) == true
+        || request.auth.token.get('email', '') in [
           'davidjudo.23@gmail.com',
           'alejkunkel@gmail.com'
         ]
-        && request.auth.token.email_verified == true;
+      );
     }
 
-    // Publicaciones de productos
-    match /listings/{id} {
-      allow read: if true;
-      allow create: if signedIn() && request.resource.data.owner == request.auth.uid;
-      allow update: if isAdmin()
-        || (signedIn() && resource.data.owner == request.auth.uid
-            && request.resource.data.owner == resource.data.owner);
+    // ---------- Validaciones ----------
+
+    function validListing(data) {
+      return data.keys().hasAll([
+          'title', 'seller', 'size', 'alt', 'pay', 'ship', 'city', 'cat',
+          'sold', 'cond', 'price', 'wa', 'photo', 'photos', 'owner', 'ts',
+          'status'
+        ])
+        && data.title is string && data.title.size() <= 60
+        && data.seller is string && data.seller.size() <= 40
+        && data.size is string && data.size.size() <= 10
+        && data.alt is string && data.alt.size() <= 150
+        && data.pay is list && data.ship is list
+        && data.city is string && data.city.size() <= 40
+        && data.cat is string && data.cond is string
+        && data.sold is bool
+        && data.price is number && data.price >= 0
+        && data.wa is string && data.wa.size() <= 20
+        && (data.photo == null || data.photo is string)
+        && data.photos is list && data.photos.size() <= 4
+        && data.owner is string
+        && data.ts is number
+        && data.status in ['pending', 'approved']
+        && (!data.keys().hasAny(['featured']) || data.featured is bool);
+    }
+
+    function validWanted(data) {
+      return data.keys().hasAll(['text', 'name', 'city', 'wa', 'owner', 'ts', 'status'])
+        && data.text is string && data.text.size() > 0 && data.text.size() <= 100
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 40
+        && data.city is string && data.city.size() <= 40
+        && data.wa is string && data.wa.size() <= 20
+        && data.owner is string
+        && data.ts is number
+        && data.status in ['pending', 'approved'];
+    }
+
+    function validReview(data, reviewId) {
+      return data.keys().hasAll(['seller', 'sellerName', 'rating', 'name', 'text', 'by', 'ts'])
+        && data.by == request.auth.uid
+        && data.seller is string
+        && data.seller != request.auth.uid
+        && reviewId == request.auth.uid + '_' + data.seller
+        && data.sellerName is string
+        && data.rating is number && data.rating >= 1 && data.rating <= 5
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 40
+        && data.text is string && data.text.size() <= 200
+        && data.ts is number;
+    }
+
+    // ---------- Publicaciones de productos ----------
+    // Público: solo las aprobadas. Cada usuario ve además las suyas. El admin ve todo.
+    // Las consultas de la app deben filtrar por status o por owner (ya lo hacen).
+    match /listings/{listingId} {
+      allow read: if isAdmin()
+        || (signedIn() && resource.data.owner == request.auth.uid)
+        || resource.data.status == 'approved';
+
+      // Un usuario común solo puede crear en revisión y sin destacar.
+      // El admin puede crear ya aprobada.
+      allow create: if signedIn()
+        && request.resource.data.owner == request.auth.uid
+        && validListing(request.resource.data)
+        && (
+          isAdmin()
+          || (
+            request.resource.data.status == 'pending'
+            && (!request.resource.data.keys().hasAny(['featured'])
+                || request.resource.data.featured == false)
+          )
+        );
+
+      // El dueño edita lo suyo pero NO puede tocar status ni featured.
+      allow update: if (isAdmin() && validListing(request.resource.data))
+        || (
+          signedIn()
+          && resource.data.owner == request.auth.uid
+          && request.resource.data.owner == resource.data.owner
+          && validListing(request.resource.data)
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['status', 'featured'])
+        );
+
       allow delete: if isAdmin() || (signedIn() && resource.data.owner == request.auth.uid);
     }
 
-    // "Se busca"
-    match /wanted/{id} {
-      allow read: if true;
-      allow create: if signedIn() && request.resource.data.owner == request.auth.uid;
-      allow update: if isAdmin();
+    // ---------- "Se busca" ----------
+    match /wanted/{wantedId} {
+      allow read: if isAdmin()
+        || (signedIn() && resource.data.owner == request.auth.uid)
+        || resource.data.status == 'approved';
+
+      allow create: if signedIn()
+        && request.resource.data.owner == request.auth.uid
+        && validWanted(request.resource.data)
+        && (isAdmin() || request.resource.data.status == 'pending');
+
+      allow update: if isAdmin() && validWanted(request.resource.data);
       allow delete: if isAdmin() || (signedIn() && resource.data.owner == request.auth.uid);
     }
 
-    // Aprobaciones y destacados: solo el administrador escribe
-    match /mod/{id} {
+    // ---------- Colección vieja de aprobaciones (solo por transición) ----------
+    // La app nueva ya no la usa. ELIMINAR este bloque cuando todo esté verificado.
+    match /mod/{documentId} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
-    // Vendedores verificados: solo el administrador escribe
-    match /sellers/{id} {
+    // ---------- Vendedores verificados ----------
+    match /sellers/{sellerUid} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
-    // Denuncias: cualquiera con cuenta denuncia, solo el administrador las lee
-    match /reports/{id} {
-      allow create: if signedIn();
-      allow read, update, delete: if isAdmin();
-    }
-
-    // Opiniones: una por comprador y por vendedor, nunca sobre uno mismo
-    match /reviews/{id} {
+    // ---------- Opiniones: una por comprador y vendedor, nunca sobre uno mismo ----------
+    match /reviews/{reviewId} {
       allow read: if true;
-      allow create, update: if signedIn()
-        && request.resource.data.by == request.auth.uid
-        && request.resource.data.seller != request.auth.uid
-        && id == request.auth.uid + '_' + request.resource.data.seller
-        && request.resource.data.rating is number
-        && request.resource.data.rating >= 1
-        && request.resource.data.rating <= 5;
+      allow create: if signedIn() && validReview(request.resource.data, reviewId);
+      allow update: if signedIn()
+        && resource.data.by == request.auth.uid
+        && validReview(request.resource.data, reviewId);
       allow delete: if isAdmin();
+    }
+
+    // ---------- Denuncias: cualquiera con cuenta denuncia, solo el admin las lee ----------
+    match /reports/{reportId} {
+      allow create: if signedIn()
+        && request.resource.data.by == request.auth.uid
+        && request.resource.data.listing is string
+        && request.resource.data.title is string
+        && request.resource.data.ts is number;
+      allow read, update, delete: if isAdmin();
     }
   }
 }

@@ -5,7 +5,16 @@ import {
 	assertFails,
 	assertSucceeds,
 } from "@firebase/rules-unit-testing";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import {
+	collection,
+	doc,
+	getDoc,
+	getDocs,
+	query,
+	setDoc,
+	updateDoc,
+	where,
+} from "firebase/firestore";
 
 const projectId = "casa-del-judoca-dev";
 let environment;
@@ -32,7 +41,7 @@ const validListing = {
 
 beforeAll(async () => {
 	const rules = await readFile(
-		new URL("../../firestore.rules.v2", import.meta.url),
+		new URL("../../firestore.rules", import.meta.url),
 		"utf8",
 	);
 	environment = await initializeTestEnvironment({
@@ -127,7 +136,7 @@ it("el claim de administrador habilita la aprobación", async () => {
 	);
 });
 
-it("cada comprador puede dejar una opinión válida por vendedor y nunca sobre sí mismo", async () => {
+it("cada comprador puede dejar y actualizar su opinión, nunca sobre sí mismo ni en nombre de otra persona", async () => {
 	const firestore = environment.authenticatedContext("buyer").firestore();
 	const review = {
 		seller: "seller",
@@ -140,7 +149,11 @@ it("cada comprador puede dejar una opinión válida por vendedor y nunca sobre s
 	};
 	const reviewRef = doc(firestore, "reviews/buyer_seller");
 	await assertSucceeds(setDoc(reviewRef, review));
-	await assertFails(setDoc(reviewRef, review));
+	// La misma persona puede actualizar su opinión.
+	await assertSucceeds(setDoc(reviewRef, { ...review, rating: 4 }));
+	// Otra persona no puede pisar la opinión ajena.
+	const other = environment.authenticatedContext("other").firestore();
+	await assertFails(setDoc(doc(other, "reviews/buyer_seller"), review));
 	await assertFails(
 		setDoc(doc(firestore, "reviews/buyer_buyer"), {
 			...review,
@@ -167,4 +180,108 @@ it("solo administración puede leer denuncias", async () => {
 		.firestore();
 	await assertFails(getDoc(doc(publicFirestore, "reports/report-1")));
 	await assertSucceeds(getDoc(doc(adminFirestore, "reports/report-1")));
+});
+
+it("un correo de administrador habilita la aprobación aunque no esté verificado", async () => {
+	await environment.withSecurityRulesDisabled(async (context) => {
+		await setDoc(doc(context.firestore(), "listings/by-email"), validListing);
+	});
+	const adminByEmail = environment
+		.authenticatedContext("admin-email", {
+			email: "davidjudo.23@gmail.com",
+			email_verified: false,
+		})
+		.firestore();
+	await assertSucceeds(
+		updateDoc(doc(adminByEmail, "listings/by-email"), {
+			...validListing,
+			status: "approved",
+		}),
+	);
+	const stranger = environment
+		.authenticatedContext("stranger", {
+			email: "otra@example.com",
+			email_verified: true,
+		})
+		.firestore();
+	await assertFails(
+		updateDoc(doc(stranger, "listings/by-email"), { status: "pending" }),
+	);
+});
+
+it("nadie puede publicar ya aprobada o destacada sin ser administrador", async () => {
+	const seller = environment.authenticatedContext("seller").firestore();
+	await assertFails(
+		setDoc(doc(seller, "listings/self-approved"), {
+			...validListing,
+			status: "approved",
+		}),
+	);
+	await assertFails(
+		setDoc(doc(seller, "listings/self-featured"), {
+			...validListing,
+			featured: true,
+		}),
+	);
+	const admin = environment
+		.authenticatedContext("admin", { admin: true })
+		.firestore();
+	await assertSucceeds(
+		setDoc(doc(admin, "listings/admin-approved"), {
+			...validListing,
+			owner: "admin",
+			status: "approved",
+		}),
+	);
+});
+
+it("las consultas que usa la app están permitidas para cada tipo de persona", async () => {
+	await environment.withSecurityRulesDisabled(async (context) => {
+		const firestore = context.firestore();
+		await setDoc(doc(firestore, "listings/approved"), {
+			...validListing,
+			status: "approved",
+		});
+		await setDoc(doc(firestore, "listings/pending-own"), validListing);
+		await setDoc(doc(firestore, "listings/pending-other"), {
+			...validListing,
+			owner: "other",
+		});
+		await setDoc(doc(firestore, "wanted/approved"), {
+			text: "Judogi",
+			name: "Buscador",
+			city: "",
+			wa: "5491122334455",
+			owner: "seller",
+			ts: 1,
+			status: "approved",
+		});
+	});
+	const listings = (firestore) => collection(firestore, "listings");
+	const wanted = (firestore) => collection(firestore, "wanted");
+
+	const anonymous = environment.unauthenticatedContext().firestore();
+	await assertSucceeds(
+		getDocs(query(listings(anonymous), where("status", "==", "approved"))),
+	);
+	await assertFails(getDocs(listings(anonymous)));
+	await assertSucceeds(
+		getDocs(query(wanted(anonymous), where("status", "==", "approved"))),
+	);
+	await assertFails(getDocs(wanted(anonymous)));
+
+	const seller = environment.authenticatedContext("seller").firestore();
+	await assertSucceeds(
+		getDocs(query(listings(seller), where("status", "==", "approved"))),
+	);
+	await assertSucceeds(
+		getDocs(query(listings(seller), where("owner", "==", "seller"))),
+	);
+	await assertFails(getDocs(listings(seller)));
+
+	const admin = environment
+		.authenticatedContext("admin", { admin: true })
+		.firestore();
+	await assertSucceeds(getDocs(listings(admin)));
+	await assertSucceeds(getDocs(wanted(admin)));
 });

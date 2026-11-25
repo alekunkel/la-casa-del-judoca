@@ -12,6 +12,11 @@ import { getAuthErrorMessage } from "../utils/authMessages.js";
 
 const AuthContext = createContext(null);
 
+const ADMIN_EMAILS = new Set([
+	"davidjudo.23@gmail.com",
+	"alejkunkel@gmail.com",
+]);
+
 export function AuthProvider({ children }) {
 	const [user, setUser] = useState(null);
 	const [loading, setLoading] = useState(true);
@@ -30,11 +35,17 @@ export function AuthProvider({ children }) {
 					return;
 				}
 				try {
-					const tokenResult = await nextUser.getIdTokenResult();
-					setIsAdmin(tokenResult.claims.admin === true);
+					const tokenResult = await nextUser.getIdTokenResult(true);
+					const hasClaim = tokenResult.claims.admin === true;
+					const hasAdminEmail = ADMIN_EMAILS.has(
+						(nextUser.email || "").toLowerCase(),
+					);
+					setIsAdmin(hasClaim || hasAdminEmail);
 				} catch (error) {
 					console.error("No se pudo resolver el token de autenticación.", error);
-					setIsAdmin(false);
+					setIsAdmin(
+						ADMIN_EMAILS.has((nextUser.email || "").toLowerCase()),
+					);
 				} finally {
 					setLoading(false);
 				}
